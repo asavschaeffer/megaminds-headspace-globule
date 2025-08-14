@@ -44,21 +44,15 @@ main.scroll-container {
     opacity: 1;
 }
 
-/* The interaction map is the top layer and is always visible */
+/* === BASE INTERACTION MAP STYLES === */
 .interaction-map {
     z-index: 100;
 }
 
-.interaction-map path {
-    transition: fill 0.2s ease-in-out;
-    /* --- Temporary debugging outlines --- */
-    stroke: rgba(255, 87, 255, 0.8);
-    stroke-width: 5;
-    stroke-dasharray: 25 15;
-}
-
-/* For Scene 2, ensure paths are always hit-testable by their geometry */
-#scene-mid-mountain .interaction-map path {
+.interaction-map path,
+.interaction-map circle,
+.interaction-map rect {
+    transition: all 0.3s ease;
     pointer-events: all;
 }
 
@@ -67,53 +61,34 @@ main.scroll-container {
     fill: transparent;
 }
 
-.interaction-map a:hover * {
-    /* On any tier, hovering reveals a yellow highlight */
-    fill: rgba(255, 255, 0, 0.3) !important; 
+/* === SCENE-SPECIFIC STYLES === */
+
+/* Scene 1: Peak - Celestial/Mystical Effects */
+#scene-peak .interaction-map a:hover * {
+    fill: rgba(135, 206, 235, 0.3) !important;
+    filter: drop-shadow(0 0 15px rgba(135, 206, 235, 0.6)) brightness(1.4);
 }
 
-/* --- Scene 2 Layout --- */
-#scene-mid-mountain .interaction-layer {
-    display: flex;
-    flex-direction: column;
-    z-index: 100; /* Place on top of visual layer */
+/* Scene 2: Mid-Mountain - Earthy/Forest Effects */
+#scene-mid-mountain .interaction-map a:hover * {
+    fill: rgba(34, 139, 34, 0.3) !important;
+    filter: drop-shadow(0 0 12px rgba(34, 139, 34, 0.5)) brightness(1.3);
 }
 
-#scene-mid-mountain .interaction-layer a {
-    text-decoration: none;
+/* Scene 3: Cave - Dark/Fire Effects */
+#scene-cave .interaction-map a:hover * {
+    fill: rgba(255, 69, 0, 0.3) !important;
+    filter: drop-shadow(0 0 18px rgba(255, 69, 0, 0.7)) brightness(1.5);
 }
 
-#scene-mid-mountain .interaction-layer a > div {
-    width: 100%;
-    height: 100%;
-    transition: background-color 0.2s ease-in-out;
+/* Scene 4: Cliff Edge - Storm/Electric Effects */
+#scene-cliff-edge .interaction-map a:hover * {
+    fill: rgba(138, 43, 226, 0.3) !important;
+    filter: drop-shadow(0 0 20px rgba(138, 43, 226, 0.8)) brightness(1.4);
 }
 
-#scene-mid-mountain .interaction-layer a:hover > div {
-    background-color: rgba(255, 255, 0, 0.3) !important; 
-}
-
-#fog-top {
-    height: 15vh;
-}
-
-#cliffs {
-    flex: 1;
-}
-
-#fog-bottom {
-    height: 15vh;
-}
-
-.fog-bg {
-    background-color: #b0c4de;
-}
-
-.cliffs-bg {
-    background-color: #4d4d4d;
-}
-
-.tier-1 #scene-mid-mountain .fog-bg,
-.tier-1 #scene-mid-mountain .cliffs-bg {
-    background-color: transparent;
+/* Scene 5: Purgatorio - Ice/Divine Effects */
+#scene-purgatorio .interaction-map a:hover * {
+    fill: rgba(255, 255, 255, 0.4) !important;
+    filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.9)) brightness(1.6);
 }

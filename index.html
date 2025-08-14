@@ -40,42 +40,58 @@
           data-src="images/fog-shrouded-mountain-green-slopes.jpeg"
           class="visual-layer"
           alt="Foggy green mountain slopes." />
-        <div class="interaction-layer">
-          <a href="#fog-top-link" id="fog-top">
-            <div class="fog-bg"></div>
+        <svg
+          class="interaction-map"
+          viewBox="0 0 1920 1080"
+          preserveAspectRatio="xMidYMid slice">
+          <!-- Top fog area (back to peak) -->
+          <a href="#scene-peak">
+            <rect x="0" y="0" width="1920" height="162" fill="#b0c4de"/>
           </a>
-          <a href="#cliffs-link" id="cliffs">
-            <div class="cliffs-bg"></div>
+          <!-- Middle cliffs area -->
+          <a href="#cliffs-link">
+            <rect x="0" y="162" width="1920" height="756" fill="#4d4d4d"/>
           </a>
-          <a href="#fog-bottom-link" id="fog-bottom">
-            <div class="fog-bg"></div>
+          <!-- Bottom fog area -->
+          <a href="#fog-bottom-link">
+            <rect x="0" y="918" width="1920" height="162" fill="#b0c4de"/>
           </a>
-        </div>
+        </svg>
       </div>
 
       <!-- Scene 3: Cave -->
-        <div id="scene-cave" class="scene-container">
-            <img data-src="images/dark-cave-waterfall-traverse-person-path-cliff.png" class="visual-layer" alt="A dark cave with a waterfall, showing a person traversing a cliff path.">
-            <svg class="interaction-map" viewBox="0 0 1920 2560" preserveAspectRatio="xMidYMid slice">
-                <a href="#cave-left-fg">
-                    <!-- Top Left Shape -->
-                    <path d="M 0 0 L 900 0 L 990 1152 L 0 1152 Z" fill="#222222"></path>
-                </a>
-                <a href="#cave-left-bg">
-                    <!-- Bottom Left Shape -->
-                    <path d="M 0 1152 L 990 1152 L 1100 2560 L 0 2560 Z" fill="#111111"></path>
-                </a>
-                <a href="#cave-right">
-                    <!-- Right Shape -->
-                    <path d="M 900 0 L 1920 0 L 1920 2560 L 1100 2560 L 990 1152 L 900 0 Z" fill="#333333"></path>
-                </a>
-            </svg>
-        </div>
+      <div id="scene-cave" class="scene-container">
+        <img
+          data-src="images/dark-cave-waterfall-traverse-person-path-cliff.png"
+          class="visual-layer"
+          alt="A dark cave with a waterfall, showing a person traversing a cliff path." />
+        <svg
+          class="interaction-map"
+          viewBox="0 0 1920 2560"
+          preserveAspectRatio="xMidYMid slice">
+          <a href="#cave-left-fg">
+            <!-- Top Left Shape -->
+            <path d="M 0 0 L 900 0 L 990 1152 L 0 1152 Z" fill="#222222"></path>
+          </a>
+          <a href="#cave-left-bg">
+            <!-- Bottom Left Shape -->
+            <path
+              d="M 0 1152 L 990 1152 L 1100 2560 L 0 2560 Z"
+              fill="#111111"></path>
+          </a>
+          <a href="#cave-right">
+            <!-- Right Shape -->
+            <path
+              d="M 900 0 L 1920 0 L 1920 2560 L 1100 2560 L 990 1152 L 900 0 Z"
+              fill="#333333"></path>
+          </a>
+        </svg>
+      </div>
 
       <!-- Scene 4: Cliff Edge -->
-        <div id="scene-cliff-edge" class="scene-container">
-            <img data-src="images/dramatic-cliff-view-stormy-sea-waterfalling-into-bottomless-pit-mountain-horizon-adventure-nature-photography.jpg" class="visual-layer" alt="A dramatic cliff view of a stormy sea with a waterfall plunging into a pit.">
-            <svg class="interaction-map" viewBox="0 0 1920 2560" preserveAspectRatio="xMidYMid slice">
+      <div id="scene-cliff-edge" class="scene-container">
+        <img data-src="images/dramatic-cliff-view-stormy-sea-waterfalling-into-bottomless-pit-mountain-horizon-adventure-nature-photography.jpg" class="visual-layer" alt="A dramatic cliff view of a stormy sea with a waterfall plunging into a pit.">
+        <svg class="interaction-map" viewBox="0 0 1920 2560" preserveAspectRatio="xMidYMid slice">
 
           <!--
             Render order is important for clickability.
@@ -84,45 +100,57 @@
           -->
 
           <!-- Shape 3: The Ground (everything else) -->
-                <a href="#cliff-edge-main">
+          <a href="#cliff-edge-main">
             <path fill-rule="evenodd" d="
               M 0 0 H 1920 V 2560 H 0 Z
               M 960 0 L 1920 0 L 1920 1583 L 1135 1583 A 350 350 0 0 0 960 930 L 960 0 Z
               M 1310 1280 A 350 350 0 1 0 610 1280 A 350 350 0 1 0 1310 1280 Z
             " fill="#936d49"></path>
-                </a>
+          </a>
 
           <!-- Shape 1: The Pit (a simple circle) -->
-                <a href="#cliff-edge-pit">
-                    <circle cx="960" cy="1280" r="350" fill="#333333"></circle>
-                </a>
+          <a href="#cliff-edge-pit">
+            <circle cx="960" cy="1280" r="350" fill="#333333"></circle>
+          </a>
 
           <!-- Shape 2: The Sky/Sea (a complex path for the top-right) -->
           <a href="#open-sea">
             <path d="M 960 0 L 1920 0 L 1920 1583 L 1135 1583 A 350 350 0 0 0 960 930 L 960 0 Z" fill="#0059a3"></path>
           </a>
 
-            </svg>
-        </div>
+        </svg>
+      </div>
 
       <!-- Scene 5: Purgatorio -->
-        <div id="scene-purgatorio" class="scene-container">
-            <img data-src="images/i kinda cookedv13.png" class="visual-layer" alt="A massive, icy mountain island in a turbulent sea under a cloudy sky.">
-            <svg class="interaction-map" viewBox="0 0 1920 2560" preserveAspectRatio="xMidYMid slice">
-                <!-- Sea -->
-                <a href="#purgatorio-sea">
-                    <path d="M 0 2560 L 1920 2560 L 1920 1456 L 1200 1456 C 1000 1606, 920 1606, 720 1456 L 0 1456 Z" fill="#323c9b"></path>
-                </a>
-                <!-- Sky -->
-                <a href="#purgatorio-sky">
-                    <path d="M 0 0 L 1920 0 L 1920 1456 L 1622 1456 L 1094 740 L 106 1456 L 0 1456 Z" fill="#e0ffff"></path>
-                </a>
-                <!-- Mountain -->
-                <a href="#purgatorio-mountain">
-                    <path d="M 1094 740 L 106 1456 L 720 1456 C 920 1606, 1000 1606, 1200 1456 L 1622 1456 Z" fill="#3b2828"></path>
-                </a>
-            </svg>
-        </div>
+      <div id="scene-purgatorio" class="scene-container">
+        <img
+          data-src="images/i kinda cookedv13.png"
+          class="visual-layer"
+          alt="A massive, icy mountain island in a turbulent sea under a cloudy sky." />
+        <svg
+          class="interaction-map"
+          viewBox="0 0 1920 2560"
+          preserveAspectRatio="xMidYMid slice">
+          <!-- Sea -->
+          <a href="#purgatorio-sea">
+            <path
+              d="M 0 2560 L 1920 2560 L 1920 1456 L 1200 1456 C 1000 1606, 920 1606, 720 1456 L 0 1456 Z"
+              fill="#323c9b"></path>
+          </a>
+          <!-- Sky -->
+          <a href="#purgatorio-sky">
+            <path
+              d="M 0 0 L 1920 0 L 1920 1456 L 1622 1456 L 1094 740 L 106 1456 L 0 1456 Z"
+              fill="#e0ffff"></path>
+          </a>
+          <!-- Mountain -->
+          <a href="#purgatorio-mountain">
+            <path
+              d="M 1094 740 L 106 1456 L 720 1456 C 920 1606, 1000 1606, 1200 1456 L 1622 1456 Z"
+              fill="#3b2828"></path>
+          </a>
+        </svg>
+      </div>
     </main>
 
     <script src="enhancer.js"></script>
