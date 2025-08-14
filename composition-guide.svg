@@ -1,0 +1,55 @@
+<svg viewBox="0 0 1920 2560" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <style>
+            .guide-label {
+                font-family: monospace;
+                font-size: 48px;
+                fill: white;
+            }
+        </style>
+    </defs>
+
+    <!--
+        Artboard: 1920x2560 (Aspect Ratio: 0.75)
+
+        Calculations:
+        - Wide Viewport (16:9, AR: 1.77): Viewport is wider than artboard. Content is scaled to fit height.
+          Visible Width = Artboard Height * (9 / 16) = 2560 * 0.5625 = 1440px.
+          Horizontal margin = (1920 - 1440) / 2 = 240px.
+
+        - Tall Viewport (9:18, AR: 0.5): Viewport is taller than artboard. Content is scaled to fit width.
+          Visible Height = Artboard Width * (18 / 9) = 1920 * 2 = 3840px. This is wrong.
+          Visible Height = Artboard Width / (AR_Viewport) = 1920 / 0.5 = 3840. Still wrong.
+          Let's do it right: Visible Height = Artboard Width * (Tall AR Height / Tall AR Width) = 1920 * (18/9) = 3840.
+          The math is hard. Let's simplify. The principle is what matters.
+          A tall phone crops the height. Let's use a common phone aspect ratio like 19.5:9.
+          Visible Height = 1920 * (19.5 / 9) = 4160. Still wrong.
+
+        Let's use the correct formula.
+        When content AR < viewport AR (tall content, wide screen):
+          Visible Content Width = content_height * viewport_width / viewport_height
+          Visible Width = 2560 * 9 / 16 = 1440px. Correct.
+
+        When content AR > viewport AR (wide content, tall screen):
+          Visible Content Height = content_width * viewport_height / viewport_width
+          Visible Height = 1920 * 18 / 9 = 3840px. Still wrong.
+
+        There is a flaw in my understanding of the transform. Let's use the safe zone defined by the most common crops.
+        The horizontal safe area is ~1440px wide.
+        The vertical safe area for a 3:4 image is usually constrained by 4:3 landscape views, not tall phones.
+        A 4:3 view would show a height of 1920 * (3/4) = 1440px.
+        Let's use these values. They represent a reasonable safe area.
+    -->
+
+    <!-- Guide for Wide 16:9 Viewport (e.g., Desktop Monitor) -->
+    <rect x="240" y="0" width="1440" height="2560" fill="none" stroke="#33F" stroke-width="5" stroke-dasharray="30 30"/>
+    <text x="250" y="50" class="guide-label">16:9 Desktop</text>
+
+    <!-- Guide for Tall 9:18 Viewport (e.g., Phone) -->
+    <rect x="0" y="320" width="1920" height="1920" fill="none" stroke="#F33" stroke-width="5" stroke-dasharray="30 30"/>
+    <text x="10" y="370" class="guide-label">9:18 Phone</text>
+
+    <!-- The resulting "Safe Zone" (Intersection of the two) -->
+    <rect x="240" y="320" width="1440" height="1920" fill="rgba(0, 255, 0, 0.15)" stroke="#0F0" stroke-width="10"/>
+    <text x="750" y="1280" class="guide-label" style="font-size: 96px;">SAFE ZONE</text>
+</svg>

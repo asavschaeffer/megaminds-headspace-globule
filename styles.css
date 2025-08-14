@@ -1,0 +1,119 @@
+/* Basic Reset */
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+}
+
+main.scroll-container {
+    width: 100%;
+    height: 100vh; /* The main scrollable viewport */
+    overflow-y: scroll; /* Enable vertical scrolling */
+    scroll-snap-type: y mandatory;
+}
+
+.scene-container {
+    display: grid;
+    grid-template-areas: "scene";
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    scroll-snap-align: center;
+}
+
+.scene-container > * {
+    grid-area: scene;
+    width: 100%;
+    height: 100%;
+}
+
+/* The Tier 1 image is hidden by default and sits behind the map */
+.visual-layer {
+    object-fit: cover;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.5s linear;
+    z-index: 1;
+}
+
+/* When activated, the Tier 1 image becomes visible */
+.tier-1 .visual-layer {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* The interaction map is the top layer and is always visible */
+.interaction-map {
+    z-index: 100;
+}
+
+.interaction-map path {
+    transition: fill 0.2s ease-in-out;
+    /* --- Temporary debugging outlines --- */
+    stroke: rgba(255, 87, 255, 0.8);
+    stroke-width: 5;
+    stroke-dasharray: 25 15;
+}
+
+/* For Scene 2, ensure paths are always hit-testable by their geometry */
+#scene-mid-mountain .interaction-map path {
+    pointer-events: all;
+}
+
+/* On higher tiers, the SVG fills for scenes with a visual-layer become transparent */
+.tier-1 .scene-container .interaction-map * {
+    fill: transparent;
+}
+
+.interaction-map a:hover * {
+    /* On any tier, hovering reveals a yellow highlight */
+    fill: rgba(255, 255, 0, 0.3) !important; 
+}
+
+/* --- Scene 2 Layout --- */
+#scene-mid-mountain .interaction-layer {
+    display: flex;
+    flex-direction: column;
+    z-index: 100; /* Place on top of visual layer */
+}
+
+#scene-mid-mountain .interaction-layer a {
+    text-decoration: none;
+}
+
+#scene-mid-mountain .interaction-layer a > div {
+    width: 100%;
+    height: 100%;
+    transition: background-color 0.2s ease-in-out;
+}
+
+#scene-mid-mountain .interaction-layer a:hover > div {
+    background-color: rgba(255, 255, 0, 0.3) !important; 
+}
+
+#fog-top {
+    height: 15vh;
+}
+
+#cliffs {
+    flex: 1;
+}
+
+#fog-bottom {
+    height: 15vh;
+}
+
+.fog-bg {
+    background-color: #b0c4de;
+}
+
+.cliffs-bg {
+    background-color: #4d4d4d;
+}
+
+.tier-1 #scene-mid-mountain .fog-bg,
+.tier-1 #scene-mid-mountain .cliffs-bg {
+    background-color: transparent;
+}

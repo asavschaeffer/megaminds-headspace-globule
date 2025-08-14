@@ -1,0 +1,74 @@
+## 🧱 **Tiered Scene Architecture: Graceful Degradation Map System**
+
+### 🌑 **Tier 0: Vector Skeleton Mode**
+
+- **Trigger**: Minimal GPU, RAM, or bandwidth
+- **Render**: JS-drawn `<canvas>` or inline SVG
+  - Triangle for mountain
+  - Black background
+  - White fog as translucent polygon
+  - Star dots as random circles
+- **Links**: SVG `<a>` tags or JS click zones
+- **Fallback**: No animations, no external assets
+
+---
+
+### 🌘 **Tier 1: Low-Fidelity SVG Map**
+
+- **Trigger**: Slightly better specs or bandwidth
+- **Render**: 3 separate low-res SVGs for sky, mountain, fog
+- **Interaction**: SVG `<use>` or `<image>` with `<a>` overlays
+- **Styling**: Basic CSS hover effects
+- **Assets**: Lightweight, compressed SVGs
+
+---
+
+### 🌗 **Tier 2: Mid-Fidelity Scene**
+
+- **Trigger**: Moderate device capability
+- **Render**: One mid-res background image
+- **Interaction**: SVG map overlays with mild CSS animations
+  - Fog pulses
+  - Stars twinkle via `@keyframes`
+- **Assets**: Optimized PNG/JPG + SVG overlay
+
+---
+
+### 🌕 **Tier 3: High-Fidelity Scene**
+
+- **Trigger**: Good GPU, RAM, screen size
+- **Render**: Three HD layered images
+  - Parallax via mouse movement
+  - SVG overlays with animated transitions
+- **Interaction**: Smooth hover/click effects
+- **Assets**: Lazy-loaded HD images, compressed for performance
+
+---
+
+### 🌌 **Tier 4: Immersive WebGL Experience**
+
+- **Trigger**: High-end device, stable connection
+- **Render**: Three.js scene
+  - Volumetric fog shaders
+  - Mouse-reactive camera movement
+  - Procedural stars, comets, and sky effects
+- **Interaction**: Full 3D click zones or raycasting
+- **Assets**: WebGL shaders, texture maps, dynamic lighting
+
+---
+
+## 🧠 Adaptive Loading Strategy
+
+- **Detection**: Use `navigator.hardwareConcurrency`, `devicePixelRatio`, `connection.effectiveType`, and screen size to assign tier
+- **Progressive Enhancement**: Load lowest tier first, then upgrade if possible
+- **User Override**: Let users opt into lower fidelity if they prefer speed or minimalism
+
+---
+
+## 🗣️ Chatbot Integration (Scene-Specific)
+
+- **Trigger**: Certain zones (e.g. summit with Shiva)
+- **Render**: Embedded chatbot UI
+  - Tier 0–1: Text-only, minimal styling
+  - Tier 2–4: Styled, animated, possibly voice-enabled
+- **Behavior**: Scene-aware responses, lore-based dialogue, optional guidance
