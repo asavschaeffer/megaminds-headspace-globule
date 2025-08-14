@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Headspace</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            overflow: hidden;
+        }
+        
+        .space-container {
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        .space-svg {
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+        
+        .space-svg:hover {
+            filter: blur(0.5px) brightness(1.1);
+            backdrop-filter: blur(8px);
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html">
+        <div class="space-container">
+            <svg class="space-svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+                <!-- Black space background -->
+                <rect width="1920" height="1080" fill="#000000"/>
+                
+                <!-- White planet in center -->
+                <circle cx="960" cy="540" r="120" fill="#ffffff"/>
+            </svg>
+        </div>
+    </a>
+</body>
+</html>

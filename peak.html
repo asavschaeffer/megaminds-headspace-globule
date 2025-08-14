@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-case=1.0">
+    <title>Peak</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background: #1a1a2e;
+            overflow: hidden;
+        }
+        
+        .peak-container {
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        .peak-svg {
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+        
+        .peak-svg:hover {
+            filter: blur(0.5px) brightness(1.1);
+            backdrop-filter: blur(8px);
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html">
+        <div class="peak-container">
+            <svg class="peak-svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+                <!-- Night sky background -->
+                <rect width="1920" height="1080" fill="url(#nightGradient)"/>
+                
+                <!-- Rocky ground path at bottom -->
+                <path d="M 0 900 L 500 880 L 960 860 L 1400 890 L 1920 910 L 1920 1080 L 0 1080 Z" fill="#555555"/>
+                
+                <!-- Fog layers -->
+                <ellipse cx="200" cy="600" rx="400" ry="150" fill="#ffffff" opacity="0.3"/>
+                <ellipse cx="1600" cy="550" rx="350" ry="120" fill="#ffffff" opacity="0.4"/>
+                
+                <!-- Stars in night sky -->
+                <circle cx="400" cy="150" r="2" fill="#ffffff"/>
+                <circle cx="1200" cy="100" r="1.5" fill="#ffffff"/>
+                
+                <defs>
+                    <linearGradient id="nightGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stop-color="#0a0a2e"/>
+                        <stop offset="70%" stop-color="#1a1a2e"/>
+                        <stop offset="100%" stop-color="#2a2a3e"/>
+                    </linearGradient>
+                </defs>
+            </svg>
+        </div>
+    </a>
+</body>
+</html>
