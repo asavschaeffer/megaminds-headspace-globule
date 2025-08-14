@@ -76,18 +76,32 @@
         <div id="scene-cliff-edge" class="scene-container">
             <img data-src="images/dramatic-cliff-view-stormy-sea-waterfalling-into-bottomless-pit-mountain-horizon-adventure-nature-photography.jpg" class="visual-layer" alt="A dramatic cliff view of a stormy sea with a waterfall plunging into a pit.">
             <svg class="interaction-map" viewBox="0 0 1920 2560" preserveAspectRatio="xMidYMid slice">
-                <!-- The main ground area, with the other shapes cut out -->
+
+          <!--
+            Render order is important for clickability.
+            The ground is drawn first, so it's "behind" the other two shapes.
+            This ensures that the links for the pit and sky are clickable.
+          -->
+
+          <!-- Shape 3: The Ground (everything else) -->
                 <a href="#cliff-edge-main">
-                    <path d="M 0 0 L 1920 0 L 1920 2560 L 0 2560 Z M 960 0 L 1920 0 L 1920 1583 L 1135 1583 A 350 350 0 0 1 960 930 L 960 0 Z M 1310 1280 A 350 350 0 1 0 610 1280 A 350 350 0 1 0 1310 1280 Z" fill-rule="evenodd" fill="#936d49"></path>
+            <path fill-rule="evenodd" d="
+              M 0 0 H 1920 V 2560 H 0 Z
+              M 960 0 L 1920 0 L 1920 1583 L 1135 1583 A 350 350 0 0 0 960 930 L 960 0 Z
+              M 1310 1280 A 350 350 0 1 0 610 1280 A 350 350 0 1 0 1310 1280 Z
+            " fill="#936d49"></path>
                 </a>
-                <!-- The sky/sea area -->
-                <a href="#open-sea">
-                    <path d="M 960 0 L 1920 0 L 1920 1583 L 1135 1583 A 350 350 0 0 1 960 930 L 960 0 Z" fill="#0059a3"></path>
-                </a>
-                <!-- The pit -->
+
+          <!-- Shape 1: The Pit (a simple circle) -->
                 <a href="#cliff-edge-pit">
                     <circle cx="960" cy="1280" r="350" fill="#333333"></circle>
                 </a>
+
+          <!-- Shape 2: The Sky/Sea (a complex path for the top-right) -->
+          <a href="#open-sea">
+            <path d="M 960 0 L 1920 0 L 1920 1583 L 1135 1583 A 350 350 0 0 0 960 930 L 960 0 Z" fill="#0059a3"></path>
+          </a>
+
             </svg>
         </div>
 
