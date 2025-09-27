@@ -2,47 +2,1972 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Headspace</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <title>Headspace - Memory Galaxy</title>
     <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
             background: #000;
+            color: #ddd;
+            font-family: 'Monaco', 'Courier New', monospace;
             overflow: hidden;
-        }
-        
-        .space-container {
-            width: 100vw;
             height: 100vh;
+            position: relative;
+            user-select: none;
         }
-        
-        .space-svg {
+
+        #galaxy-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            cursor: pointer;
-            transition: opacity 0.3s ease;
+            background: radial-gradient(ellipse at center,
+                        rgba(10, 0, 30, 0.4) 0%,
+                        rgba(0, 0, 10, 0.8) 40%,
+                        rgba(0, 0, 0, 1) 100%);
+            cursor: crosshair;
         }
-        
-        .space-svg:hover {
-            filter: blur(0.5px) brightness(1.1);
-            backdrop-filter: blur(8px);
+
+        #galaxy-canvas.over-node {
+            cursor: pointer;
+        }
+
+        #status {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 12px;
+            color: rgba(200, 200, 200, 0.5);
+            text-align: right;
+            pointer-events: none;
+            text-shadow: 0 0 5px rgba(100, 150, 255, 0.3);
+        }
+
+        #input-container {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(10, 10, 30, 0.95);
+            border: 1px solid rgba(100, 150, 255, 0.3);
+            backdrop-filter: blur(20px);
+            padding: 12px 16px;
+            border-radius: 8px;
+            box-shadow: 0 0 50px rgba(100, 150, 255, 0.2);
+            min-width: 500px;
+            max-width: 90%;
+            transition: all 0.3s;
+        }
+
+        @media (max-width: 768px) {
+            #input-container {
+                bottom: env(safe-area-inset-bottom, 20px);
+                left: 10px;
+                right: 10px;
+                min-width: unset;
+                width: calc(100% - 20px);
+                transform: none;
+                max-width: none;
+                padding: 10px 12px;
+            }
+        }
+
+        #input-container.hidden {
+            opacity: 0;
+            transform: translateX(-50%) translateY(100px);
+            pointer-events: none;
+            visibility: hidden;
+        }
+
+        #brain-input {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 14px;
+            width: 100%;
+            outline: none;
+            font-family: inherit;
+            resize: none;
+            min-height: 20px;
+            max-height: 200px;
+        }
+
+        #brain-input::placeholder {
+            color: rgba(150, 150, 200, 0.5);
+        }
+
+        .info-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(10, 10, 30, 0.8);
+            border: 1px solid rgba(100, 150, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 15px;
+            border-radius: 8px;
+            max-width: 300px;
+            font-size: 12px;
+            line-height: 1.6;
+            color: rgba(200, 200, 220, 0.8);
+            transition: transform 0.3s;
+        }
+
+        @media (max-width: 768px) {
+            .info-panel {
+                top: 10px;
+                left: 10px;
+                right: 10px;
+                max-width: none;
+                padding: 10px;
+                font-size: 11px;
+                transform: translateY(-100%);
+            }
+
+            .info-panel.visible {
+                transform: translateY(0);
+            }
+        }
+
+        .info-panel h3 {
+            color: rgba(150, 180, 255, 0.9);
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .info-panel .controls {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(100, 150, 255, 0.1);
+        }
+
+        .info-panel .control-item {
+            margin: 5px 0;
+            color: rgba(180, 180, 200, 0.7);
+        }
+
+        .info-panel .key {
+            color: rgba(150, 180, 255, 0.8);
+            font-weight: bold;
+        }
+
+        /* Back to homepage link */
+        .back-link {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            color: rgba(150, 180, 255, 0.6);
+            text-decoration: none;
+            font-size: 12px;
+            transition: all 0.3s;
+            padding: 8px 16px;
+            border: 1px solid rgba(100, 150, 255, 0.2);
+            border-radius: 4px;
+            background: rgba(10, 10, 30, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        @media (max-width: 768px) {
+            .back-link {
+                display: none;
+            }
+        }
+
+        .back-link:hover {
+            color: rgba(200, 220, 255, 0.9);
+            border-color: rgba(150, 180, 255, 0.5);
+            background: rgba(20, 20, 40, 0.8);
+        }
+
+        /* Breathing animation */
+        @keyframes breathe {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+
+        .breathing {
+            animation: breathe 30s infinite ease-in-out;
+        }
+
+        #search-container {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(10, 10, 30, 0.8);
+            border: 1px solid rgba(100, 150, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 8px 12px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            #search-container {
+                top: auto;
+                bottom: 100px;
+                left: 10px;
+                right: 10px;
+                transform: none;
+                width: auto;
+            }
+        }
+
+        #search-container.active {
+            display: block;
+        }
+
+        #search-input {
+            background: transparent;
+            border: none;
+            color: rgba(200, 200, 220, 0.9);
+            font-size: 13px;
+            width: 250px;
+            outline: none;
+            font-family: inherit;
+        }
+
+        #search-input::placeholder {
+            color: rgba(150, 150, 200, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            #search-input {
+                width: 100%;
+            }
+        }
+
+        /* Mobile menu button */
+        .mobile-menu-btn {
+            display: none;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 40px;
+            height: 40px;
+            background: rgba(10, 10, 30, 0.8);
+            border: 1px solid rgba(100, 150, 255, 0.3);
+            border-radius: 50%;
+            color: rgba(150, 180, 255, 0.8);
+            font-size: 20px;
+            text-align: center;
+            line-height: 38px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            #status {
+                top: 60px;
+                right: 10px;
+                font-size: 10px;
+            }
+        }
+
+        /* Prevent scrolling on mobile */
+        @media (max-width: 768px) {
+            body {
+                position: fixed;
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+            }
         }
     </style>
 </head>
 <body>
-    <a href="index.html">
-        <div class="space-container">
-            <svg class="space-svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
-                <!-- Black space background -->
-                <rect width="1920" height="1080" fill="#000000"/>
-                
-                <!-- White planet in center -->
-                <circle cx="960" cy="540" r="120" fill="#ffffff"/>
-            </svg>
+    <canvas id="galaxy-canvas"></canvas>
+
+    <div id="search-container">
+        <input type="text" id="search-input" placeholder="Search thoughts... (/ or Ctrl+F)">
+    </div>
+
+    <button class="mobile-menu-btn" onclick="document.querySelector('.info-panel').classList.toggle('visible')">
+        ☰
+    </button>
+
+    <div class="info-panel">
+        <h3>Memory Galaxy</h3>
+        <div>Thoughts drift through space, clustering by similarity</div>
+        <div class="controls">
+            <div class="control-item"><span class="key">Click & Drag</span> - Navigate space</div>
+            <div class="control-item"><span class="key">Scroll</span> - Zoom in/out</div>
+            <div class="control-item"><span class="key">Click Node</span> - View thought</div>
+            <div class="control-item"><span class="key">Type</span> - Add new thought</div>
+            <div class="control-item"><span class="key">Ctrl+Enter</span> - Save thought</div>
         </div>
-    </a>
+    </div>
+
+    <div id="status">
+        <div id="node-count">0 thoughts</div>
+        <div id="time"></div>
+    </div>
+
+    <div id="input-container">
+        <textarea id="brain-input"
+                  placeholder="Type your thoughts... (Ctrl+Enter to save)"
+                  rows="1"></textarea>
+    </div>
+
+    <a href="index.html" class="back-link">← Back to Homepage</a>
+
+    <script>
+        class GalaxyBrain {
+            constructor() {
+                this.canvas = document.getElementById('galaxy-canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.input = document.getElementById('brain-input');
+                this.inputContainer = document.getElementById('input-container');
+                this.searchInput = document.getElementById('search-input');
+                this.searchContainer = document.getElementById('search-container');
+
+                this.nodes = [];
+                this.edges = [];
+                this.particles = [];
+                this.stars = [];
+
+                this.camera = {
+                    x: 0,
+                    y: 0,
+                    vx: 0,
+                    vy: 0,
+                    zoom: 1,
+                    targetZoom: 1,
+                    damping: 0.88
+                };
+
+                this.mouse = {
+                    x: 0,
+                    y: 0,
+                    dragStart: null,
+                    hoveredNode: null
+                };
+
+                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth <= 768;
+
+                this.settings = {
+                    nodeGravity: 0.005,
+                    centerGravity: 0.0002,
+                    connectionForce: 0.01,
+                    damping: 0.85,
+                    minNodeSize: isMobile ? 6 : 3,  // Bigger nodes on mobile
+                    maxNodeSize: isMobile ? 25 : 20,
+                    breathingSpeed: 0.0003,
+                    particleCount: isMobile ? 30 : 100,  // Fewer particles on mobile
+                    starCount: isMobile ? 100 : 200,  // Fewer stars on mobile
+                    velocityThreshold: 0.01
+                };
+
+                this.breathingPhase = 0;
+                this.lastSaveTime = Date.now();
+                this.editingNode = null;
+                this.searchTerm = '';
+                this.expandedNode = null;
+                this.tooltip = { visible: false, x: 0, y: 0, text: '' };
+                this.animationFrames = {};
+
+                this.init();
+            }
+
+            init() {
+                this.resizeCanvas();
+                this.createStarField();
+                this.createInitialNodes();
+                this.bindEvents();
+                this.animate();
+                this.updateStatus();
+            }
+
+            resizeCanvas() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            }
+
+            createStarField() {
+                // Create stars that will be rendered in screen space
+                for (let i = 0; i < this.settings.starCount; i++) {
+                    this.stars.push({
+                        // Position as percentage of screen (0-1)
+                        x: Math.random(),
+                        y: Math.random(),
+                        size: Math.random() * 1.5,
+                        brightness: Math.random() * 0.8 + 0.2,
+                        twinkleSpeed: Math.random() * 0.002 + 0.001,  // Much slower twinkle
+                        depth: Math.random() * 0.5 + 0.5  // Parallax depth layer
+                    });
+                }
+            }
+
+            createInitialNodes() {
+                // Create rich demo nodes with diverse content
+                const demoThoughts = [
+                    {
+                        title: "Time & Memory Theory",
+                        content: "What if time is just memory crystallizing? Each moment becomes solid only in retrospect, and the present is always fluid, always becoming.",
+                        type: "idea",
+                        tags: ["philosophy", "time", "consciousness"],
+                        metadata: { author: "late night thoughts", mood: "contemplative" }
+                    },
+                    {
+                        title: "Q4 Planning Meeting",
+                        content: "Tomorrow 2pm - Discuss roadmap for next quarter. Key points:\n• Resource allocation\n• Timeline review\n• Risk assessment\n• Team expansion needs",
+                        type: "meeting",
+                        tags: ["work", "planning", "team"],
+                        metadata: { attendees: 12, room: "Blue Sky", duration: "2 hours" }
+                    },
+                    {
+                        title: "Dream State Function",
+                        content: "async function dreamState() {\n  const thoughts = await collectDaily();\n  const processed = thoughts.map(t => transform(t));\n  await sleep(28800); // 8 hours\n  return consolidate(processed);\n}",
+                        type: "code",
+                        tags: ["javascript", "async", "creative"],
+                        metadata: { language: "javascript", lines: 6 }
+                    },
+                    {
+                        title: "Neural Network Dreams?",
+                        content: "How do neural networks dream? Do they experience something like our REM sleep when they're being trained? Is backpropagation their form of reflection?",
+                        type: "question",
+                        tags: ["AI", "neuroscience", "deep learning"],
+                        metadata: { research_links: 3, papers_to_read: 5 }
+                    },
+                    {
+                        title: "Consciousness Research",
+                        content: "TODO: Explore consciousness algorithms\n- Read Integrated Information Theory papers\n- Implement simple IIT calculator\n- Compare with Global Workspace Theory\n- Write blog post on findings",
+                        type: "todo",
+                        tags: ["research", "consciousness", "AI"],
+                        metadata: { priority: "high", estimated_hours: 20 }
+                    },
+                    {
+                        title: "Memory Leak Alert",
+                        content: "ERROR in production - memory leak in thoughts.js:142\nStack trace: ThoughtProcessor.accumulate() is not releasing references\nImpact: 2GB/hour memory growth\nFix: Implement WeakMap for thought cache",
+                        type: "error",
+                        tags: ["bug", "production", "urgent"],
+                        metadata: { severity: "high", affected_users: 1200, ticket: "BUG-4521" }
+                    },
+                    {
+                        title: "Computational Universe",
+                        content: "The universe computes itself into existence. Every particle interaction is a calculation, every moment a new iteration of the cosmic algorithm.",
+                        type: "idea",
+                        tags: ["physics", "computation", "philosophy"],
+                        metadata: { inspired_by: "Wolfram's theory", mood: "awestruck" }
+                    },
+                    {
+                        title: "React Hooks Pattern",
+                        content: "const useThought = (initial) => {\n  const [thought, setThought] = useState(initial);\n  const [history, setHistory] = useState([]);\n  \n  const evolve = (transformer) => {\n    setHistory([...history, thought]);\n    setThought(transformer(thought));\n  };\n  \n  return [thought, evolve, history];\n}",
+                        type: "code",
+                        tags: ["react", "patterns", "frontend"],
+                        metadata: { language: "javascript", usefulness: "high" }
+                    },
+                    {
+                        title: "Learning Rust",
+                        content: "Day 15 of learning Rust:\n- Finally understood the borrow checker!\n- Lifetimes make sense now\n- Building a small memory allocator\n- Next: async/await in depth",
+                        type: "learning",
+                        tags: ["rust", "programming", "study"],
+                        metadata: { progress: "30%", confidence: "growing" }
+                    },
+                    {
+                        title: "Product Launch Ideas",
+                        content: "Brainstorm for next product:\n1. AI-powered dream journal\n2. Collaborative mind mapping in VR\n3. Quantum-inspired random idea generator\n4. Thought-to-code translator\n5. Memory palace builder app",
+                        type: "idea",
+                        tags: ["product", "brainstorm", "startup"],
+                        metadata: { potential: "high", feasibility: "medium" }
+                    },
+                    {
+                        title: "Database Migration",
+                        content: "TODO: Migrate user thoughts from PostgreSQL to Neo4j\n- Better for graph relationships\n- Estimated 2M nodes, 10M edges\n- Need to maintain backward compatibility\n- Schedule maintenance window",
+                        type: "todo",
+                        tags: ["database", "migration", "backend"],
+                        metadata: { priority: "medium", risk: "moderate", deadline: "Q1 2025" }
+                    },
+                    {
+                        title: "Morning Meditation",
+                        content: "15 minutes of clarity. Noticed how thoughts arise like bubbles from deep water, each one perfect and temporary. The mind's background process is always running.",
+                        type: "thought",
+                        tags: ["meditation", "mindfulness", "personal"],
+                        metadata: { time: "6:30 AM", feeling: "peaceful" }
+                    },
+                    {
+                        title: "API Rate Limiting",
+                        content: "Implement rate limiting for thought-stream API:\n- 100 requests/minute per user\n- Use Redis for distributed counting\n- Exponential backoff for violations\n- Return 429 with Retry-After header",
+                        type: "code",
+                        tags: ["API", "security", "backend"],
+                        metadata: { implementation: "pending", priority: "high" }
+                    },
+                    {
+                        title: "Team Standup Notes",
+                        content: "Yesterday: Fixed memory leak in thought processor\nToday: Implementing node expansion animations\nBlockers: Need design review for UI changes\nHelp needed: Performance profiling on large graphs",
+                        type: "meeting",
+                        tags: ["standup", "team", "daily"],
+                        metadata: { date: "today", team_size: 8 }
+                    },
+                    {
+                        title: "Emergence Pattern",
+                        content: "Complex behaviors emerge from simple rules. Like Conway's Game of Life, consciousness might be an emergent property of neural interactions following basic principles.",
+                        type: "idea",
+                        tags: ["complexity", "emergence", "systems"],
+                        metadata: { related_to: "consciousness research", certainty: "hypothesis" }
+                    }
+                ];
+
+                // Position nodes in a more interesting spiral pattern
+                demoThoughts.forEach((thought, i) => {
+                    const spiralAngle = (i / demoThoughts.length) * Math.PI * 4;
+                    const spiralRadius = 50 + i * 15;
+
+                    this.addNode({
+                        id: Date.now() + i,
+                        title: thought.title,
+                        content: thought.content,
+                        type: thought.type,
+                        tags: thought.tags,
+                        metadata: thought.metadata,
+                        x: Math.cos(spiralAngle) * spiralRadius + (Math.random() - 0.5) * 30,
+                        y: Math.sin(spiralAngle) * spiralRadius + (Math.random() - 0.5) * 30,
+                        vx: (Math.random() - 0.5) * 0.3,
+                        vy: (Math.random() - 0.5) * 0.3,
+                        size: (window.innerWidth <= 768 ? 10 : 6) + Math.random() * 8,
+                        created: Date.now() - Math.random() * 604800000, // Random time in last week
+                        heat: Math.random() * 0.3
+                    });
+                });
+
+                // Update connections after all nodes are added
+                this.updateConnections();
+            }
+
+            addNode(nodeData) {
+                const node = {
+                    id: nodeData.id || Date.now(),
+                    title: nodeData.title || nodeData.content.substring(0, 50),
+                    content: nodeData.content,
+                    type: nodeData.type || this.getTypeFromContent(nodeData.content),
+                    tags: nodeData.tags || [],
+                    x: nodeData.x || (Math.random() - 0.5) * 200,
+                    y: nodeData.y || (Math.random() - 0.5) * 200,
+                    vx: nodeData.vx || 0,
+                    vy: nodeData.vy || 0,
+                    size: nodeData.size || 8,
+                    color: nodeData.color || this.getColorFromContent(nodeData.content),
+                    created: nodeData.created || Date.now(),
+                    heat: nodeData.heat || 1.0,
+                    pulsePhase: Math.random() * Math.PI * 2,
+                    expanded: false,
+                    expandProgress: 0,
+                    metadata: nodeData.metadata || {}
+                };
+
+                this.nodes.push(node);
+                this.updateConnections();
+                return node;
+            }
+
+            getTypeFromContent(content) {
+                const lower = content.toLowerCase();
+                if (lower.includes('error') || lower.includes('bug')) return 'error';
+                if (lower.includes('question') || lower.includes('?')) return 'question';
+                if (lower.includes('todo') || lower.includes('task')) return 'todo';
+                if (lower.includes('code') || lower.includes('function')) return 'code';
+                if (lower.includes('meeting') || lower.includes('call')) return 'meeting';
+                if (lower.includes('idea') || lower.includes('what if')) return 'idea';
+                if (lower.includes('learn') || lower.includes('study')) return 'learning';
+                return 'thought';
+            }
+
+            getColorFromContent(content) {
+                const type = this.getTypeFromContent(content);
+                const colors = {
+                    'error': 'rgba(255, 100, 100, 0.8)',
+                    'question': 'rgba(255, 200, 100, 0.8)',
+                    'todo': 'rgba(150, 255, 150, 0.8)',
+                    'code': 'rgba(200, 150, 255, 0.8)',
+                    'meeting': 'rgba(100, 200, 255, 0.8)',
+                    'idea': 'rgba(255, 150, 200, 0.8)',
+                    'learning': 'rgba(150, 255, 200, 0.8)',
+                    'thought': 'rgba(150, 180, 255, 0.8)'
+                };
+                return colors[type] || colors['thought'];
+            }
+
+            updateConnections() {
+                // Similarity-based connections with improved algorithm
+                this.edges = [];
+                for (let i = 0; i < this.nodes.length; i++) {
+                    for (let j = i + 1; j < this.nodes.length; j++) {
+                        const similarity = this.calculateSimilarity(this.nodes[i].content, this.nodes[j].content);
+                        if (similarity > 0.25) {
+                            this.edges.push({
+                                from: i,
+                                to: j,
+                                strength: similarity
+                            });
+                        }
+                    }
+                }
+            }
+
+            extractKeywords(text) {
+                const stopWords = ['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'is', 'was', 'are', 'were', 'been', 'be', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'should', 'could', 'may', 'might', 'must', 'can', 'this', 'that', 'these', 'those', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'what', 'which', 'who', 'when', 'where', 'why', 'how', 'all', 'each', 'every', 'both', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 'just'];
+                return text.toLowerCase()
+                    .split(/\s+/)
+                    .filter(word => word.length > 2 && !stopWords.includes(word));
+            }
+
+            calculateSimilarity(text1, text2) {
+                const words1 = this.extractKeywords(text1);
+                const words2 = this.extractKeywords(text2);
+
+                if (words1.length === 0 || words2.length === 0) {
+                    return 0;
+                }
+
+                // Jaccard similarity
+                const set1 = new Set(words1);
+                const set2 = new Set(words2);
+                const intersection = new Set([...set1].filter(x => set2.has(x)));
+                const union = new Set([...set1, ...set2]);
+
+                return intersection.size / union.size;
+            }
+
+            bindEvents() {
+                // Canvas interactions - Mouse
+                this.canvas.addEventListener('mousedown', (e) => this.onMouseDown(e));
+                this.canvas.addEventListener('mousemove', (e) => this.onMouseMove(e));
+                this.canvas.addEventListener('mouseup', (e) => this.onMouseUp(e));
+                this.canvas.addEventListener('wheel', (e) => this.onWheel(e));
+
+                // Touch events for mobile
+                this.canvas.addEventListener('touchstart', (e) => this.onTouchStart(e), { passive: false });
+                this.canvas.addEventListener('touchmove', (e) => this.onTouchMove(e), { passive: false });
+                this.canvas.addEventListener('touchend', (e) => this.onTouchEnd(e), { passive: false });
+
+                // Variables for pinch zoom
+                this.touches = [];
+                this.lastTouchDistance = 0;
+
+                // Window resize
+                window.addEventListener('resize', () => this.resizeCanvas());
+
+                // Input handling
+                this.input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && e.ctrlKey) {
+                        e.preventDefault();
+                        this.saveThought();
+                    }
+                });
+
+                this.input.addEventListener('input', () => {
+                    this.input.style.height = 'auto';
+                    this.input.style.height = Math.min(200, this.input.scrollHeight) + 'px';
+                });
+
+                // Show/hide input on key press
+                document.addEventListener('keydown', (e) => {
+                    // Escape closes expanded node
+                    if (e.key === 'Escape' && this.expandedNode && e.target === document.body) {
+                        e.preventDefault();
+                        this.collapseNode();
+                        return;
+                    }
+                    // Search shortcuts
+                    if ((e.key === '/' || (e.ctrlKey && e.key === 'f')) && e.target === document.body) {
+                        e.preventDefault();
+                        this.searchContainer.classList.add('active');
+                        this.searchInput.focus();
+                        this.searchInput.select();
+                    }
+                    // Regular typing for new thoughts (not on mobile - they should use button)
+                    else if (e.target === document.body && !e.ctrlKey && !e.altKey && !e.metaKey && e.key !== '/' && window.innerWidth > 768) {
+                        this.inputContainer.classList.remove('hidden');
+                        this.input.focus();
+                    }
+                });
+
+                // Add mobile input button
+                if (window.innerWidth <= 768) {
+                    const addButton = document.createElement('button');
+                    addButton.style.cssText = `
+                        position: fixed;
+                        bottom: 30px;
+                        right: 20px;
+                        width: 56px;
+                        height: 56px;
+                        border-radius: 50%;
+                        background: rgba(100, 150, 255, 0.9);
+                        border: none;
+                        color: white;
+                        font-size: 28px;
+                        line-height: 56px;
+                        text-align: center;
+                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                        z-index: 1500;
+                        cursor: pointer;
+                    `;
+                    addButton.innerHTML = '+';
+                    addButton.onclick = () => {
+                        this.inputContainer.classList.remove('hidden');
+                        this.input.focus();
+                    };
+                    document.body.appendChild(addButton);
+                }
+
+                // Hide input on escape
+                this.input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        this.input.blur();
+                        this.inputContainer.classList.add('hidden');
+                    }
+                });
+
+                // Search input handling
+                this.searchInput.addEventListener('input', (e) => {
+                    this.searchTerm = e.target.value.toLowerCase();
+                    this.filterNodes();
+                });
+
+                this.searchInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        this.searchTerm = '';
+                        this.searchInput.value = '';
+                        this.searchContainer.classList.remove('active');
+                        this.filterNodes();
+                    }
+                });
+            }
+
+            saveThought() {
+                const content = this.input.value.trim();
+                if (!content) return;
+
+                if (this.editingNode) {
+                    // Edit existing node
+                    this.editingNode.content = content;
+                    this.editingNode.color = this.getColorFromContent(content);
+                    this.editingNode.heat = 1.0; // Reheat the node
+
+                    // Create a pulse effect
+                    this.createPulse(this.editingNode.x, this.editingNode.y);
+
+                    this.editingNode = null;
+                } else {
+                    // Create new node
+                    const node = this.addNode({
+                        content: content,
+                        x: (Math.random() - 0.5) * 100,
+                        y: (Math.random() - 0.5) * 100,
+                        vx: (Math.random() - 0.5) * 2,
+                        vy: (Math.random() - 0.5) * 2
+                    });
+
+                    // Create a pulse effect
+                    this.createPulse(node.x, node.y);
+                }
+
+                // Clear input
+                this.input.value = '';
+                this.input.style.height = 'auto';
+
+                // Update status
+                this.lastSaveTime = Date.now();
+                this.updateStatus();
+                this.updateConnections();
+
+                // Store in localStorage for persistence
+                this.saveToLocalStorage();
+            }
+
+            createPulse(x, y) {
+                for (let i = 0; i < 20; i++) {
+                    const angle = (i / 20) * Math.PI * 2;
+                    this.particles.push({
+                        x: x,
+                        y: y,
+                        vx: Math.cos(angle) * 3,
+                        vy: Math.sin(angle) * 3,
+                        life: 1.0,
+                        color: 'rgba(150, 200, 255, 0.8)'
+                    });
+                }
+            }
+
+            onMouseDown(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+
+                // Check if clicking on a node
+                const worldPos = this.screenToWorld(mouseX, mouseY);
+                const clickedNode = this.getNodeAt(worldPos.x, worldPos.y);
+
+                if (clickedNode) {
+                    if (this.expandedNode === clickedNode) {
+                        // Check if clicking close button area
+                        const expandedPos = this.worldToScreen(clickedNode.x, clickedNode.y);
+                        const closeButtonX = expandedPos.x + 140; // Top-right of expanded node
+                        const closeButtonY = expandedPos.y - 110;
+                        const closeButtonSize = 20;
+
+                        if (Math.abs(mouseX - closeButtonX) < closeButtonSize &&
+                            Math.abs(mouseY - closeButtonY) < closeButtonSize) {
+                            this.collapseNode();
+                        }
+                        // Otherwise, clicking on expanded node does nothing (allows interaction)
+                    } else if (this.expandedNode) {
+                        // Switch to different node
+                        this.collapseNode();
+                        setTimeout(() => this.expandNode(clickedNode), 200);
+                    } else {
+                        // Expand the clicked node
+                        this.expandNode(clickedNode);
+                    }
+                } else if (!this.expandedNode) {
+                    // Only start drag if no node is expanded
+                    this.mouse.dragStart = { x: mouseX, y: mouseY, cameraX: this.camera.x, cameraY: this.camera.y };
+                }
+                // Clicking outside expanded node no longer closes it
+            }
+
+            onMouseMove(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                this.mouse.x = e.clientX - rect.left;
+                this.mouse.y = e.clientY - rect.top;
+
+                if (this.mouse.dragStart) {
+                    const dx = this.mouse.x - this.mouse.dragStart.x;
+                    const dy = this.mouse.y - this.mouse.dragStart.y;
+                    // Use immediate response for dragging, not velocity
+                    this.camera.x = this.mouse.dragStart.cameraX + dx / this.camera.zoom;
+                    this.camera.y = this.mouse.dragStart.cameraY + dy / this.camera.zoom;
+                } else {
+                    // Check for hover
+                    const worldPos = this.screenToWorld(this.mouse.x, this.mouse.y);
+                    const hoveredNode = this.getNodeAt(worldPos.x, worldPos.y);
+                    this.mouse.hoveredNode = hoveredNode;
+                    this.canvas.classList.toggle('over-node', !!hoveredNode);
+
+                    // Update tooltip
+                    if (hoveredNode) {
+                        this.tooltip.visible = true;
+                        this.tooltip.x = this.mouse.x;
+                        this.tooltip.y = this.mouse.y - 30;
+                        this.tooltip.text = hoveredNode.title;
+                    } else {
+                        this.tooltip.visible = false;
+                    }
+                }
+            }
+
+            onMouseUp(e) {
+                this.mouse.dragStart = null;
+                // Removed momentum to fix position snap
+            }
+
+            onWheel(e) {
+                e.preventDefault();
+                const zoomSpeed = 1.1;
+                if (e.deltaY < 0) {
+                    this.camera.targetZoom *= zoomSpeed;
+                } else {
+                    this.camera.targetZoom /= zoomSpeed;
+                }
+                this.camera.targetZoom = Math.max(0.1, Math.min(5, this.camera.targetZoom));
+            }
+
+            onTouchStart(e) {
+                e.preventDefault();
+                this.touches = Array.from(e.touches);
+
+                if (this.touches.length === 1) {
+                    // Single touch - same as mouse down
+                    const touch = this.touches[0];
+                    const rect = this.canvas.getBoundingClientRect();
+                    const touchX = touch.clientX - rect.left;
+                    const touchY = touch.clientY - rect.top;
+
+                    // Check if tapping on a node
+                    const worldPos = this.screenToWorld(touchX, touchY);
+                    const tappedNode = this.getNodeAt(worldPos.x, worldPos.y);
+
+                    if (tappedNode) {
+                        if (this.expandedNode === tappedNode) {
+                            // Check if tapping close button area
+                            const expandedPos = this.worldToScreen(tappedNode.x, tappedNode.y);
+                            const closeButtonX = expandedPos.x + 140;
+                            const closeButtonY = expandedPos.y - 110;
+                            const closeButtonSize = 30; // Bigger touch target
+
+                            if (Math.abs(touchX - closeButtonX) < closeButtonSize &&
+                                Math.abs(touchY - closeButtonY) < closeButtonSize) {
+                                this.collapseNode();
+                            }
+                        } else if (this.expandedNode) {
+                            this.collapseNode();
+                            setTimeout(() => this.expandNode(tappedNode), 200);
+                        } else {
+                            this.expandNode(tappedNode);
+                        }
+                    } else if (!this.expandedNode) {
+                        // Start drag
+                        this.mouse.dragStart = { x: touchX, y: touchY, cameraX: this.camera.x, cameraY: this.camera.y };
+                    }
+                } else if (this.touches.length === 2) {
+                    // Two finger touch - prepare for pinch zoom
+                    const dx = this.touches[0].clientX - this.touches[1].clientX;
+                    const dy = this.touches[0].clientY - this.touches[1].clientY;
+                    this.lastTouchDistance = Math.hypot(dx, dy);
+                }
+            }
+
+            onTouchMove(e) {
+                e.preventDefault();
+                this.touches = Array.from(e.touches);
+
+                if (this.touches.length === 1 && this.mouse.dragStart) {
+                    // Single touch drag
+                    const touch = this.touches[0];
+                    const rect = this.canvas.getBoundingClientRect();
+                    const touchX = touch.clientX - rect.left;
+                    const touchY = touch.clientY - rect.top;
+
+                    const dx = touchX - this.mouse.dragStart.x;
+                    const dy = touchY - this.mouse.dragStart.y;
+                    this.camera.x = this.mouse.dragStart.cameraX + dx / this.camera.zoom;
+                    this.camera.y = this.mouse.dragStart.cameraY + dy / this.camera.zoom;
+                } else if (this.touches.length === 2) {
+                    // Pinch zoom
+                    const dx = this.touches[0].clientX - this.touches[1].clientX;
+                    const dy = this.touches[0].clientY - this.touches[1].clientY;
+                    const distance = Math.hypot(dx, dy);
+
+                    if (this.lastTouchDistance > 0) {
+                        const scale = distance / this.lastTouchDistance;
+                        this.camera.targetZoom *= scale;
+                        this.camera.targetZoom = Math.max(0.1, Math.min(5, this.camera.targetZoom));
+                    }
+
+                    this.lastTouchDistance = distance;
+                }
+            }
+
+            onTouchEnd(e) {
+                e.preventDefault();
+                this.touches = Array.from(e.touches);
+
+                if (this.touches.length === 0) {
+                    this.mouse.dragStart = null;
+                    this.lastTouchDistance = 0;
+                } else if (this.touches.length === 1) {
+                    // Going from 2 fingers to 1 - restart drag
+                    const touch = this.touches[0];
+                    const rect = this.canvas.getBoundingClientRect();
+                    const touchX = touch.clientX - rect.left;
+                    const touchY = touch.clientY - rect.top;
+                    this.mouse.dragStart = { x: touchX, y: touchY, cameraX: this.camera.x, cameraY: this.camera.y };
+                }
+            }
+
+            REMOVED_onDoubleClick(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+
+                // Check if double-clicking on expanded node content area
+                if (this.expandedNode) {
+                    const expandedPos = this.worldToScreen(this.expandedNode.x, this.expandedNode.y);
+                    const expandedWidth = 320;
+                    const expandedHeight = 240;
+
+                    // Check if click is within expanded node bounds
+                    if (Math.abs(mouseX - expandedPos.x) < expandedWidth / 2 &&
+                        Math.abs(mouseY - expandedPos.y) < expandedHeight / 2) {
+                        // Start editing this node
+                        this.startEditingNode(this.expandedNode);
+                    }
+                }
+            }
+
+            startEditingNode(node) {
+                // Create an overlay with input fields
+                const overlay = document.createElement('div');
+                overlay.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.7);
+                    z-index: 3000;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                `;
+
+                const editor = document.createElement('div');
+                editor.style.cssText = `
+                    background: rgba(20, 20, 40, 0.98);
+                    border: 1px solid rgba(100, 150, 255, 0.5);
+                    border-radius: 8px;
+                    padding: 20px;
+                    width: 500px;
+                    max-width: 90%;
+                    box-shadow: 0 0 50px rgba(100, 150, 255, 0.3);
+                `;
+
+                // Title input
+                const titleLabel = document.createElement('div');
+                titleLabel.textContent = 'Title:';
+                titleLabel.style.cssText = 'color: rgba(150, 180, 255, 0.9); font-size: 12px; margin-bottom: 5px; font-family: Monaco, monospace;';
+                editor.appendChild(titleLabel);
+
+                const titleInput = document.createElement('input');
+                titleInput.type = 'text';
+                titleInput.value = node.title || '';
+                titleInput.style.cssText = `
+                    width: 100%;
+                    background: rgba(10, 10, 30, 0.8);
+                    border: 1px solid rgba(100, 150, 255, 0.3);
+                    color: #fff;
+                    padding: 8px;
+                    margin-bottom: 15px;
+                    font-family: Monaco, monospace;
+                    font-size: 14px;
+                    border-radius: 4px;
+                    outline: none;
+                `;
+                editor.appendChild(titleInput);
+
+                // Content textarea
+                const contentLabel = document.createElement('div');
+                contentLabel.textContent = 'Content:';
+                contentLabel.style.cssText = 'color: rgba(150, 180, 255, 0.9); font-size: 12px; margin-bottom: 5px; font-family: Monaco, monospace;';
+                editor.appendChild(contentLabel);
+
+                const contentInput = document.createElement('textarea');
+                contentInput.value = node.content || '';
+                contentInput.style.cssText = `
+                    width: 100%;
+                    height: 200px;
+                    background: rgba(10, 10, 30, 0.8);
+                    border: 1px solid rgba(100, 150, 255, 0.3);
+                    color: #fff;
+                    padding: 8px;
+                    margin-bottom: 15px;
+                    font-family: Monaco, monospace;
+                    font-size: 13px;
+                    border-radius: 4px;
+                    outline: none;
+                    resize: vertical;
+                `;
+                editor.appendChild(contentInput);
+
+                // Buttons
+                const buttonContainer = document.createElement('div');
+                buttonContainer.style.cssText = 'display: flex; gap: 10px; justify-content: flex-end;';
+
+                const cancelBtn = document.createElement('button');
+                cancelBtn.textContent = 'Cancel';
+                cancelBtn.style.cssText = `
+                    background: rgba(150, 150, 150, 0.2);
+                    border: 1px solid rgba(150, 150, 150, 0.5);
+                    color: rgba(200, 200, 200, 0.9);
+                    padding: 8px 20px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-family: Monaco, monospace;
+                    font-size: 12px;
+                `;
+                cancelBtn.onclick = () => overlay.remove();
+
+                const saveBtn = document.createElement('button');
+                saveBtn.textContent = 'Save';
+                saveBtn.style.cssText = `
+                    background: rgba(100, 150, 255, 0.2);
+                    border: 1px solid rgba(100, 150, 255, 0.5);
+                    color: rgba(200, 220, 255, 0.9);
+                    padding: 8px 20px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-family: Monaco, monospace;
+                    font-size: 12px;
+                `;
+                saveBtn.onclick = () => {
+                    node.title = titleInput.value || node.content.substring(0, 50);
+                    node.content = contentInput.value;
+                    node.type = this.getTypeFromContent(node.content);
+                    node.color = this.getColorFromContent(node.content);
+                    node.heat = 1.0; // Reheat on edit
+                    this.updateConnections();
+                    this.saveToLocalStorage();
+                    overlay.remove();
+                };
+
+                buttonContainer.appendChild(cancelBtn);
+                buttonContainer.appendChild(saveBtn);
+                editor.appendChild(buttonContainer);
+
+                overlay.appendChild(editor);
+                document.body.appendChild(overlay);
+
+                // Focus title input
+                titleInput.focus();
+                titleInput.select();
+
+                // Handle escape key
+                const handleEscape = (e) => {
+                    if (e.key === 'Escape') {
+                        overlay.remove();
+                        document.removeEventListener('keydown', handleEscape);
+                    }
+                };
+                document.addEventListener('keydown', handleEscape);
+            }
+
+            screenToWorld(x, y) {
+                return {
+                    x: (x - this.canvas.width / 2) / this.camera.zoom - this.camera.x,
+                    y: (y - this.canvas.height / 2) / this.camera.zoom - this.camera.y
+                };
+            }
+
+            worldToScreen(x, y) {
+                return {
+                    x: (x + this.camera.x) * this.camera.zoom + this.canvas.width / 2,
+                    y: (y + this.camera.y) * this.camera.zoom + this.canvas.height / 2
+                };
+            }
+
+            getNodeAt(x, y) {
+                for (let node of this.nodes) {
+                    const dist = Math.hypot(node.x - x, node.y - y);
+                    if (dist < node.size + 5) {
+                        return node;
+                    }
+                }
+                return null;
+            }
+
+            expandNode(node) {
+                this.expandedNode = node;
+                node.expanded = true;
+                node.expandStartTime = Date.now();
+                this.animateExpansion();
+                this.createEditableOverlay(node);
+            }
+
+            createEditableOverlay(node) {
+                // Create DOM overlay for editing
+                const overlay = document.createElement('div');
+                overlay.id = 'node-editor-overlay';
+                overlay.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    pointer-events: none;
+                    z-index: 2000;
+                `;
+
+                // Calculate position for the editor
+                const screenPos = this.worldToScreen(node.x, node.y);
+                const isMobile = window.innerWidth <= 768;
+
+                const editor = document.createElement('div');
+
+                if (isMobile) {
+                    // Mobile: Full-width card at center of screen
+                    editor.style.cssText = `
+                        position: fixed;
+                        left: 10px;
+                        right: 10px;
+                        top: 50%;
+                        transform: translateY(-50%);
+                        max-width: 400px;
+                        margin: 0 auto;
+                        height: auto;
+                        max-height: 80vh;
+                        overflow-y: auto;
+                        background: rgba(20, 20, 40, 0.98);
+                        border: 2px solid ${node.color};
+                        border-radius: 12px;
+                        padding: 20px;
+                        box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+                        pointer-events: auto;
+                    `;
+                } else {
+                    // Desktop: Position at node location
+                    editor.style.cssText = `
+                        position: absolute;
+                        left: ${Math.max(10, Math.min(screenPos.x - 160, window.innerWidth - 340))}px;
+                        top: ${Math.max(10, Math.min(screenPos.y - 120, window.innerHeight - 260))}px;
+                        width: 320px;
+                        height: 240px;
+                        background: rgba(20, 20, 40, 0.98);
+                        border: 2px solid ${node.color};
+                        border-radius: 8px;
+                        padding: 20px;
+                        box-shadow: 0 0 50px rgba(100, 150, 255, 0.3);
+                        pointer-events: auto;
+                    `;
+                }
+
+                // Close button
+                const closeBtn = document.createElement('div');
+                closeBtn.innerHTML = '×';
+                closeBtn.style.cssText = `
+                    position: absolute;
+                    right: 10px;
+                    top: 10px;
+                    width: 25px;
+                    height: 25px;
+                    border-radius: 50%;
+                    background: rgba(255, 100, 100, 0.1);
+                    color: rgba(255, 150, 150, 0.8);
+                    font-size: 20px;
+                    line-height: 22px;
+                    text-align: center;
+                    cursor: pointer;
+                `;
+                closeBtn.onmouseover = () => closeBtn.style.background = 'rgba(255, 100, 100, 0.2)';
+                closeBtn.onmouseout = () => closeBtn.style.background = 'rgba(255, 100, 100, 0.1)';
+                closeBtn.onclick = () => {
+                    this.collapseNode();
+                    overlay.remove();
+                };
+                editor.appendChild(closeBtn);
+
+                // Title input
+                const titleInput = document.createElement('input');
+                titleInput.type = 'text';
+                titleInput.value = node.title || '';
+                titleInput.placeholder = 'Title';
+                titleInput.style.cssText = `
+                    width: 100%;
+                    background: rgba(10, 10, 30, 0.5);
+                    border: none;
+                    border-bottom: 1px solid rgba(100, 150, 255, 0.3);
+                    color: #fff;
+                    padding: 5px;
+                    margin-bottom: 10px;
+                    font-family: Monaco, monospace;
+                    font-size: 16px;
+                    font-weight: bold;
+                    outline: none;
+                `;
+                titleInput.oninput = () => {
+                    node.title = titleInput.value || node.content.substring(0, 50);
+                };
+                editor.appendChild(titleInput);
+
+                // Type/tags display
+                const typeTag = document.createElement('div');
+                typeTag.style.cssText = `
+                    color: ${node.color};
+                    font-size: 10px;
+                    font-family: Monaco, monospace;
+                    margin-bottom: 10px;
+                    text-transform: uppercase;
+                `;
+                typeTag.textContent = node.type;
+                editor.appendChild(typeTag);
+
+                // Content textarea
+                const contentInput = document.createElement('textarea');
+                contentInput.value = node.content || '';
+                contentInput.placeholder = 'Your thoughts...';
+                contentInput.style.cssText = `
+                    width: 100%;
+                    height: 120px;
+                    background: rgba(10, 10, 30, 0.3);
+                    border: 1px solid rgba(100, 150, 255, 0.2);
+                    color: rgba(200, 200, 220, 0.9);
+                    padding: 8px;
+                    font-family: Monaco, monospace;
+                    font-size: 12px;
+                    border-radius: 4px;
+                    outline: none;
+                    resize: none;
+                `;
+                contentInput.oninput = () => {
+                    node.content = contentInput.value;
+                    node.type = this.getTypeFromContent(node.content);
+                    node.color = this.getColorFromContent(node.content);
+                    typeTag.textContent = node.type;
+                    typeTag.style.color = node.color;
+                    editor.style.borderColor = node.color;
+                    this.updateConnections();
+                    this.saveToLocalStorage();
+                };
+                editor.appendChild(contentInput);
+
+                // Tags display
+                if (node.tags && node.tags.length > 0) {
+                    const tagsDiv = document.createElement('div');
+                    tagsDiv.style.cssText = `
+                        margin-top: 10px;
+                        font-size: 10px;
+                        font-family: Monaco, monospace;
+                        color: rgba(150, 200, 255, 0.7);
+                    `;
+                    tagsDiv.textContent = node.tags.map(t => '#' + t).join(' ');
+                    editor.appendChild(tagsDiv);
+                }
+
+                overlay.appendChild(editor);
+                document.body.appendChild(overlay);
+
+                // Store reference for cleanup
+                this.editorOverlay = overlay;
+
+                // Focus title
+                titleInput.focus();
+                titleInput.select();
+            }
+
+            collapseNode() {
+                if (this.expandedNode) {
+                    this.expandedNode.expanded = false;
+                    this.expandedNode.collapseStartTime = Date.now();
+                    this.animateCollapse();
+
+                    // Remove editor overlay
+                    if (this.editorOverlay) {
+                        this.editorOverlay.remove();
+                        this.editorOverlay = null;
+                    }
+                }
+            }
+
+            animateExpansion() {
+                const animate = () => {
+                    if (!this.expandedNode || !this.expandedNode.expanded) return;
+
+                    const elapsed = Date.now() - this.expandedNode.expandStartTime;
+                    const duration = 300;
+                    const progress = Math.min(elapsed / duration, 1);
+
+                    // Easing function for smooth animation
+                    this.expandedNode.expandProgress = this.easeOutCubic(progress);
+
+                    if (progress < 1) {
+                        requestAnimationFrame(animate);
+                    }
+                };
+                animate();
+            }
+
+            animateCollapse() {
+                const node = this.expandedNode;
+                const animate = () => {
+                    if (!node.collapseStartTime) return;
+
+                    const elapsed = Date.now() - node.collapseStartTime;
+                    const duration = 200;
+                    const progress = Math.min(elapsed / duration, 1);
+
+                    node.expandProgress = 1 - this.easeOutCubic(progress);
+
+                    if (progress >= 1) {
+                        node.expandProgress = 0;
+                        delete node.collapseStartTime;
+                        if (this.expandedNode === node) {
+                            this.expandedNode = null;
+                        }
+                    } else {
+                        requestAnimationFrame(animate);
+                    }
+                };
+                animate();
+            }
+
+            easeOutCubic(t) {
+                return 1 - Math.pow(1 - t, 3);
+            }
+
+            showNodeContent(node) {
+                // Create a temporary display of the content
+                const display = document.createElement('div');
+                display.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: rgba(10, 10, 30, 0.95);
+                    border: 1px solid rgba(100, 150, 255, 0.5);
+                    padding: 20px;
+                    border-radius: 8px;
+                    color: #fff;
+                    max-width: 500px;
+                    backdrop-filter: blur(20px);
+                    box-shadow: 0 0 50px rgba(100, 150, 255, 0.3);
+                    z-index: 2000;
+                    font-family: Monaco, monospace;
+                `;
+
+                // Create content container
+                const contentDiv = document.createElement('div');
+                contentDiv.textContent = node.content;
+                contentDiv.style.marginBottom = '15px';
+                display.appendChild(contentDiv);
+
+                // Create button container
+                const buttonContainer = document.createElement('div');
+                buttonContainer.style.cssText = `
+                    display: flex;
+                    gap: 10px;
+                    justify-content: flex-end;
+                    margin-top: 15px;
+                `;
+
+                // Edit button
+                const editBtn = document.createElement('button');
+                editBtn.textContent = 'Edit';
+                editBtn.style.cssText = `
+                    background: rgba(100, 150, 255, 0.2);
+                    border: 1px solid rgba(100, 150, 255, 0.5);
+                    color: rgba(200, 220, 255, 0.9);
+                    padding: 5px 15px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-family: inherit;
+                    font-size: 12px;
+                `;
+                editBtn.onmouseover = () => editBtn.style.background = 'rgba(100, 150, 255, 0.3)';
+                editBtn.onmouseout = () => editBtn.style.background = 'rgba(100, 150, 255, 0.2)';
+                editBtn.onclick = () => {
+                    display.remove();
+                    this.editNode(node);
+                };
+
+                // Delete button
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.style.cssText = `
+                    background: rgba(255, 100, 100, 0.2);
+                    border: 1px solid rgba(255, 100, 100, 0.5);
+                    color: rgba(255, 200, 200, 0.9);
+                    padding: 5px 15px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-family: inherit;
+                    font-size: 12px;
+                `;
+                deleteBtn.onmouseover = () => deleteBtn.style.background = 'rgba(255, 100, 100, 0.3)';
+                deleteBtn.onmouseout = () => deleteBtn.style.background = 'rgba(255, 100, 100, 0.2)';
+                deleteBtn.onclick = () => {
+                    if (confirm('Delete this thought?')) {
+                        display.remove();
+                        this.deleteNode(node);
+                    }
+                };
+
+                // Close button
+                const closeBtn = document.createElement('button');
+                closeBtn.textContent = 'Close';
+                closeBtn.style.cssText = `
+                    background: rgba(150, 150, 150, 0.2);
+                    border: 1px solid rgba(150, 150, 150, 0.5);
+                    color: rgba(200, 200, 200, 0.9);
+                    padding: 5px 15px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-family: inherit;
+                    font-size: 12px;
+                `;
+                closeBtn.onmouseover = () => closeBtn.style.background = 'rgba(150, 150, 150, 0.3)';
+                closeBtn.onmouseout = () => closeBtn.style.background = 'rgba(150, 150, 150, 0.2)';
+                closeBtn.onclick = () => display.remove();
+
+                buttonContainer.appendChild(editBtn);
+                buttonContainer.appendChild(deleteBtn);
+                buttonContainer.appendChild(closeBtn);
+                display.appendChild(buttonContainer);
+
+                document.body.appendChild(display);
+
+                // Remove on Escape
+                const escapeHandler = (e) => {
+                    if (e.key === 'Escape') {
+                        display.remove();
+                        document.removeEventListener('keydown', escapeHandler);
+                    }
+                };
+                document.addEventListener('keydown', escapeHandler);
+            }
+
+            editNode(node) {
+                this.input.value = node.content;
+                this.inputContainer.classList.remove('hidden');
+                this.input.focus();
+                this.editingNode = node;
+
+                // Select all text for easy replacement
+                this.input.select();
+            }
+
+            deleteNode(node) {
+                const index = this.nodes.indexOf(node);
+                if (index > -1) {
+                    this.nodes.splice(index, 1);
+                    this.updateConnections();
+                    this.saveToLocalStorage();
+                    this.updateStatus();
+
+                    // Create a disappearing effect
+                    this.createPulse(node.x, node.y);
+                }
+            }
+
+            updatePhysics() {
+                // Update breathing phase
+                this.breathingPhase += this.settings.breathingSpeed;
+
+                // Update nodes
+                for (let node of this.nodes) {
+                    // Apply center gravity
+                    const centerDist = Math.hypot(node.x, node.y);
+                    if (centerDist > 0) {
+                        node.vx -= (node.x / centerDist) * this.settings.centerGravity;
+                        node.vy -= (node.y / centerDist) * this.settings.centerGravity;
+                    }
+
+                    // Apply connections
+                    for (let edge of this.edges) {
+                        let other = null;
+                        if (this.nodes[edge.from] === node) other = this.nodes[edge.to];
+                        if (this.nodes[edge.to] === node) other = this.nodes[edge.from];
+
+                        if (other) {
+                            const dx = other.x - node.x;
+                            const dy = other.y - node.y;
+                            const dist = Math.hypot(dx, dy);
+                            if (dist > 0) {
+                                const force = edge.strength * this.settings.connectionForce;
+                                node.vx += (dx / dist) * force;
+                                node.vy += (dy / dist) * force;
+                            }
+                        }
+                    }
+
+                    // Apply damping
+                    node.vx *= this.settings.damping;
+                    node.vy *= this.settings.damping;
+
+                    // Stop tiny movements
+                    if (Math.abs(node.vx) < this.settings.velocityThreshold) node.vx = 0;
+                    if (Math.abs(node.vy) < this.settings.velocityThreshold) node.vy = 0;
+
+                    // Update position
+                    node.x += node.vx;
+                    node.y += node.vy;
+
+                    // Update heat (cooling over time)
+                    node.heat *= 0.999;
+
+                    // Update pulse phase (much slower)
+                    node.pulsePhase += 0.005;
+                }
+
+                // Update particles
+                this.particles = this.particles.filter(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vx *= 0.98;
+                    p.vy *= 0.98;
+                    p.life *= 0.95;
+                    return p.life > 0.01;
+                });
+
+                // Smooth camera zoom (faster response)
+                this.camera.zoom += (this.camera.targetZoom - this.camera.zoom) * 0.25;
+            }
+
+            render() {
+                // Clear canvas
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+                // Draw background stars BEFORE camera transform (screen space)
+                this.ctx.save();
+                this.ctx.globalAlpha = 0.6;
+                for (let star of this.stars) {
+                    // Calculate star position in screen space with parallax
+                    const parallaxFactor = star.depth * 0.1;  // Slower movement for depth
+                    const screenX = star.x * this.canvas.width + (this.camera.x * parallaxFactor * this.camera.zoom);
+                    const screenY = star.y * this.canvas.height + (this.camera.y * parallaxFactor * this.camera.zoom);
+
+                    // Wrap stars around screen edges for infinite starfield
+                    const wrappedX = ((screenX % this.canvas.width) + this.canvas.width) % this.canvas.width;
+                    const wrappedY = ((screenY % this.canvas.height) + this.canvas.height) % this.canvas.height;
+
+                    const twinkle = Math.sin(Date.now() * star.twinkleSpeed) * 0.3 + 0.7;  // Subtler twinkle
+
+                    this.ctx.fillStyle = `rgba(200, 220, 255, ${star.brightness * twinkle})`;
+                    this.ctx.beginPath();
+                    this.ctx.arc(wrappedX, wrappedY, star.size * star.depth, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
+                this.ctx.restore();
+
+                // Save context for world-space rendering
+                this.ctx.save();
+
+                // Apply camera transform for world objects
+                this.ctx.translate(this.canvas.width / 2, this.canvas.height / 2);
+                this.ctx.scale(this.camera.zoom, this.camera.zoom);
+                this.ctx.translate(this.camera.x, this.camera.y);
+
+                // Draw edges
+                this.ctx.globalAlpha = 0.6;
+                for (let edge of this.edges) {
+                    const from = this.nodes[edge.from];
+                    const to = this.nodes[edge.to];
+                    if (!from || !to) continue;
+
+                    const gradient = this.ctx.createLinearGradient(from.x, from.y, to.x, to.y);
+                    gradient.addColorStop(0, from.color);
+                    gradient.addColorStop(1, to.color);
+
+                    this.ctx.strokeStyle = gradient;
+                    this.ctx.lineWidth = edge.strength * 4 + 1;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(from.x, from.y);
+                    this.ctx.lineTo(to.x, to.y);
+                    this.ctx.stroke();
+                }
+
+                // Draw particles
+                this.ctx.globalAlpha = 1;
+                for (let particle of this.particles) {
+                    this.ctx.fillStyle = particle.color.replace('0.8', particle.life);
+                    this.ctx.beginPath();
+                    this.ctx.arc(particle.x, particle.y, 2 * particle.life, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
+
+                // Draw nodes
+                for (let node of this.nodes) {
+                    // Check if node matches search
+                    let opacity = node.filtered ? 0.15 : 1.0;
+
+                    // Dim other nodes when one is expanded
+                    if (this.expandedNode && node !== this.expandedNode) {
+                        opacity *= 0.3;
+                    }
+
+                    // Node glow
+                    const pulse = Math.sin(node.pulsePhase) * 0.2 + 0.8;
+                    const breathing = Math.sin(this.breathingPhase) * 0.1 + 0.9;
+                    const heat = 0.5 + node.heat * 0.5;
+
+                    // Outer glow
+                    const glowSize = node.size * 3 * pulse * breathing;
+                    const glow = this.ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, glowSize);
+                    glow.addColorStop(0, node.color.replace('0.8', '0.3'));
+                    glow.addColorStop(1, node.color.replace('0.8', '0'));
+
+                    this.ctx.fillStyle = glow;
+                    this.ctx.globalAlpha = opacity * 0.5;
+                    this.ctx.beginPath();
+                    this.ctx.arc(node.x, node.y, glowSize, 0, Math.PI * 2);
+                    this.ctx.fill();
+
+                    // Main node
+                    this.ctx.fillStyle = node.color;
+                    this.ctx.globalAlpha = heat * opacity;
+                    this.ctx.beginPath();
+                    this.ctx.arc(node.x, node.y, node.size * breathing, 0, Math.PI * 2);
+                    this.ctx.fill();
+
+                    // Inner light
+                    this.ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                    this.ctx.globalAlpha = opacity * 0.5;
+                    this.ctx.beginPath();
+                    this.ctx.arc(node.x - node.size * 0.3, node.y - node.size * 0.3, node.size * 0.3, 0, Math.PI * 2);
+                    this.ctx.fill();
+
+                    // Hover effect
+                    if (node === this.mouse.hoveredNode && !this.expandedNode) {
+                        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+                        this.ctx.lineWidth = 2;
+                        this.ctx.beginPath();
+                        this.ctx.arc(node.x, node.y, node.size + 5, 0, Math.PI * 2);
+                        this.ctx.stroke();
+                    }
+                }
+
+                // Restore context
+                this.ctx.restore();
+
+                // Draw tooltip if visible (in screen space)
+                if (this.tooltip.visible && this.mouse.hoveredNode && !this.expandedNode) {
+                    this.drawTooltip();
+                }
+            }
+
+            drawExpandedNode(node) {
+                // Draw expanded content at the node's actual position
+                const screenPos = this.worldToScreen(node.x, node.y);
+                const expandedWidth = 320 * node.expandProgress;
+                const expandedHeight = 240 * node.expandProgress;
+
+                this.ctx.save();
+
+                // Draw expanded background
+                const gradient = this.ctx.createRadialGradient(
+                    screenPos.x, screenPos.y, 0,
+                    screenPos.x, screenPos.y, Math.max(expandedWidth, expandedHeight) / 2
+                );
+                gradient.addColorStop(0, 'rgba(30, 30, 60, 0.98)');
+                gradient.addColorStop(1, 'rgba(10, 10, 30, 0.95)');
+
+                this.ctx.fillStyle = gradient;
+                this.ctx.strokeStyle = node.color.replace('0.8', String(0.8 * node.expandProgress));
+                this.ctx.lineWidth = 2;
+                this.ctx.globalAlpha = node.expandProgress;
+
+                // Draw rounded rectangle
+                this.ctx.beginPath();
+                this.ctx.roundRect(
+                    screenPos.x - expandedWidth / 2,
+                    screenPos.y - expandedHeight / 2,
+                    expandedWidth,
+                    expandedHeight,
+                    8
+                );
+                this.ctx.fill();
+                this.ctx.stroke();
+
+                // Draw content if sufficiently expanded
+                if (node.expandProgress > 0.5) {
+                    const contentAlpha = (node.expandProgress - 0.5) * 2;
+                    this.ctx.globalAlpha = contentAlpha;
+
+                    // Title
+                    this.ctx.font = 'bold 16px Monaco, monospace';
+                    this.ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+                    this.ctx.fillText(
+                        node.title,
+                        screenPos.x - expandedWidth / 2 + 20,
+                        screenPos.y - expandedHeight / 2 + 30
+                    );
+
+                    // Type badge
+                    this.ctx.font = '10px Monaco, monospace';
+                    this.ctx.fillStyle = node.color;
+                    this.ctx.fillText(
+                        node.type.toUpperCase(),
+                        screenPos.x - expandedWidth / 2 + 20,
+                        screenPos.y - expandedHeight / 2 + 50
+                    );
+
+                    // Content (with text wrapping)
+                    this.ctx.font = '12px Monaco, monospace';
+                    this.ctx.fillStyle = 'rgba(200, 200, 220, 0.9)';
+                    this.wrapText(
+                        node.content,
+                        screenPos.x - expandedWidth / 2 + 20,
+                        screenPos.y - expandedHeight / 2 + 75,
+                        expandedWidth - 40,
+                        16
+                    );
+
+                    // Tags
+                    if (node.tags && node.tags.length > 0) {
+                        this.ctx.font = '10px Monaco, monospace';
+                        let tagX = screenPos.x - expandedWidth / 2 + 20;
+                        const tagY = screenPos.y + expandedHeight / 2 - 40;
+
+                        node.tags.forEach(tag => {
+                            this.ctx.fillStyle = 'rgba(100, 150, 255, 0.3)';
+                            const tagWidth = this.ctx.measureText('#' + tag).width + 8;
+                            this.ctx.fillRect(tagX, tagY - 12, tagWidth, 16);
+
+                            this.ctx.fillStyle = 'rgba(150, 200, 255, 0.9)';
+                            this.ctx.fillText('#' + tag, tagX + 4, tagY);
+                            tagX += tagWidth + 5;
+                        });
+                    }
+
+                    // Metadata preview
+                    if (node.metadata && Object.keys(node.metadata).length > 0) {
+                        this.ctx.font = '10px Monaco, monospace';
+                        this.ctx.fillStyle = 'rgba(150, 150, 170, 0.7)';
+                        const metaText = Object.entries(node.metadata)
+                            .slice(0, 2)
+                            .map(([k, v]) => `${k}: ${v}`)
+                            .join(' • ');
+                        this.ctx.fillText(
+                            metaText,
+                            screenPos.x - expandedWidth / 2 + 20,
+                            screenPos.y + expandedHeight / 2 - 20
+                        );
+                    }
+
+                    // Close button (X in top-right corner)
+                    const closeX = screenPos.x + expandedWidth / 2 - 30;
+                    const closeY = screenPos.y - expandedHeight / 2 + 30;
+                    const closeSize = 20;
+
+                    // Draw close button background
+                    this.ctx.fillStyle = 'rgba(255, 100, 100, 0.1)';
+                    this.ctx.beginPath();
+                    this.ctx.arc(closeX, closeY, closeSize / 2, 0, Math.PI * 2);
+                    this.ctx.fill();
+
+                    // Draw X
+                    this.ctx.strokeStyle = 'rgba(255, 150, 150, 0.8)';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.beginPath();
+                    const offset = 5;
+                    this.ctx.moveTo(closeX - offset, closeY - offset);
+                    this.ctx.lineTo(closeX + offset, closeY + offset);
+                    this.ctx.moveTo(closeX - offset, closeY + offset);
+                    this.ctx.lineTo(closeX + offset, closeY - offset);
+                    this.ctx.stroke();
+
+                    // Add "Click to edit" hint at bottom
+                    this.ctx.font = '10px Monaco, monospace';
+                    this.ctx.fillStyle = 'rgba(150, 150, 170, 0.5)';
+                    this.ctx.fillText(
+                        'Double-click to edit',
+                        screenPos.x - expandedWidth / 2 + 20,
+                        screenPos.y + expandedHeight / 2 - 15
+                    );
+                }
+
+                this.ctx.restore();
+            }
+
+            wrapText(text, x, y, maxWidth, lineHeight) {
+                const words = text.split(' ');
+                let line = '';
+                let currentY = y;
+                const maxLines = 6;
+                let lineCount = 0;
+
+                for (let n = 0; n < words.length; n++) {
+                    const testLine = line + words[n] + ' ';
+                    const metrics = this.ctx.measureText(testLine);
+                    const testWidth = metrics.width;
+
+                    if (testWidth > maxWidth && n > 0) {
+                        this.ctx.fillText(line, x, currentY);
+                        line = words[n] + ' ';
+                        currentY += lineHeight;
+                        lineCount++;
+
+                        if (lineCount >= maxLines) {
+                            this.ctx.fillText('...', x, currentY);
+                            break;
+                        }
+                    } else {
+                        line = testLine;
+                    }
+                }
+
+                if (lineCount < maxLines) {
+                    this.ctx.fillText(line, x, currentY);
+                }
+            }
+
+            drawTooltip() {
+                const padding = 8;
+                const fontSize = 12;
+                this.ctx.font = `${fontSize}px Monaco, monospace`;
+                const textWidth = this.ctx.measureText(this.tooltip.text).width;
+                const boxWidth = textWidth + padding * 2;
+                const boxHeight = fontSize + padding * 2;
+
+                // Adjust position to keep tooltip on screen
+                let x = this.tooltip.x;
+                let y = this.tooltip.y;
+
+                if (x + boxWidth > this.canvas.width) {
+                    x = this.canvas.width - boxWidth - 10;
+                }
+                if (x < 10) x = 10;
+                if (y < 10) y = this.tooltip.y + 40; // Move below cursor if too high
+
+                // Draw tooltip background
+                this.ctx.fillStyle = 'rgba(20, 20, 40, 0.95)';
+                this.ctx.strokeStyle = 'rgba(100, 150, 255, 0.5)';
+                this.ctx.lineWidth = 1;
+                this.ctx.beginPath();
+                this.ctx.roundRect(x, y, boxWidth, boxHeight, 4);
+                this.ctx.fill();
+                this.ctx.stroke();
+
+                // Draw tooltip text
+                this.ctx.fillStyle = 'rgba(220, 220, 255, 0.95)';
+                this.ctx.fillText(this.tooltip.text, x + padding, y + padding + fontSize * 0.75);
+            }
+
+            updateStatus() {
+                document.getElementById('node-count').textContent = `${this.nodes.length} thoughts`;
+
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                document.getElementById('time').textContent = timeStr;
+            }
+
+            saveToLocalStorage() {
+                const data = {
+                    nodes: this.nodes.map(n => ({
+                        content: n.content,
+                        x: n.x,
+                        y: n.y,
+                        color: n.color,
+                        created: n.created
+                    }))
+                };
+                localStorage.setItem('galaxy-brain-data', JSON.stringify(data));
+            }
+
+            loadFromLocalStorage() {
+                const stored = localStorage.getItem('galaxy-brain-data');
+                if (stored) {
+                    try {
+                        const data = JSON.parse(stored);
+                        this.nodes = [];
+                        data.nodes.forEach(n => this.addNode(n));
+                    } catch (e) {
+                        console.error('Failed to load saved data:', e);
+                    }
+                }
+            }
+
+            filterNodes() {
+                if (!this.searchTerm) {
+                    this.nodes.forEach(node => node.filtered = false);
+                } else {
+                    this.nodes.forEach(node => {
+                        node.filtered = !node.content.toLowerCase().includes(this.searchTerm);
+                    });
+                }
+            }
+
+            animate() {
+                this.updatePhysics();
+                this.render();
+                requestAnimationFrame(() => this.animate());
+            }
+        }
+
+        // Initialize the galaxy when page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            const galaxy = new GalaxyBrain();
+
+            // Update time display
+            setInterval(() => galaxy.updateStatus(), 1000);
+        });
+    </script>
 </body>
 </html>
