@@ -5,6 +5,7 @@ body, html {
     width: 100%;
     height: 100%;
     background-color: #000;
+    scroll-behavior: smooth;  /* Smooth scrolling for anchor links */
 }
 
 main.scroll-container {
@@ -12,6 +13,7 @@ main.scroll-container {
     height: 100vh; /* The main scrollable viewport */
     overflow-y: scroll; /* Enable vertical scrolling */
     scroll-snap-type: y mandatory;
+    scroll-behavior: smooth; /* Smooth scrolling for the container too */
 }
 
 .scene-container {

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Edge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+        }
+
+        .full-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .back-link {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: rgba(255, 100, 100, 0.6);
+            text-decoration: none;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            padding: 10px 20px;
+            border: 1px solid rgba(255, 100, 100, 0.3);
+            border-radius: 4px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+        }
+
+        .back-link:hover {
+            color: rgba(255, 150, 150, 0.9);
+            border-color: rgba(255, 100, 100, 0.5);
+            background: rgba(20, 0, 0, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <img src="images/hell-pit-blood-lake-tormented-souls.png" alt="The Abyss" class="full-image">
+    <a href="index.html" class="back-link">← Return</a>
+</body>
+</html>
