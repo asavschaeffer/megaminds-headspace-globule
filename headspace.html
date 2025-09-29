@@ -343,16 +343,16 @@
                     group: mountainPlanetGroup,
                     planet: planet,
                     peak: peak,
-                    link: 'asaschaeffer.com', // Change this to your desired URL
+                    link: 'index.html', // Return to main page
                     rotationSpeed: 0.001
                 };
 
                 // Add to nodes array for hover detection
                 planet.userData = {
                     isHome: true,
-                    text: 'Home - Click to explore',
-                    preview: 'Home - Click to explore',
-                    link: 'https://asaschaeffer.com' // Change this to your desired URL
+                    text: 'Return to main page',
+                    preview: 'Return to main page',
+                    link: 'index.html' // Return to main page
                 };
                 this.nodes.push(planet);
             }
@@ -615,7 +615,7 @@
                     if (this.hoveredNode && !e.target.closest('#drop-zone') && !e.target.closest('.add-button')) {
                         // Check if it's the home planet
                         if (this.hoveredNode.userData.isHome && this.hoveredNode.userData.link) {
-                            window.open(this.hoveredNode.userData.link, '_blank');
+                            window.location.href = this.hoveredNode.userData.link;
                             return;
                         }
 
