@@ -3,1971 +3,787 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <title>Headspace - Memory Galaxy</title>
+    <title>Headspace</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: #000;
-            color: #ddd;
-            font-family: 'Monaco', 'Courier New', monospace;
+            color: #fff;
             overflow: hidden;
+        }
+
+        #canvas-container {
+            width: 100vw;
             height: 100vh;
             position: relative;
-            user-select: none;
+            cursor: grab;
         }
 
-        #galaxy-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(ellipse at center,
-                        rgba(10, 0, 30, 0.4) 0%,
-                        rgba(0, 0, 10, 0.8) 40%,
-                        rgba(0, 0, 0, 1) 100%);
-            cursor: crosshair;
+        #canvas-container.grabbing {
+            cursor: grabbing;
         }
 
-        #galaxy-canvas.over-node {
+        #canvas-container.pointer {
             cursor: pointer;
         }
 
-        #status {
+        #drop-zone {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            font-size: 12px;
-            color: rgba(200, 200, 200, 0.5);
-            text-align: right;
-            pointer-events: none;
-            text-shadow: 0 0 5px rgba(100, 150, 255, 0.3);
-        }
-
-        #input-container {
-            position: absolute;
-            bottom: 30px;
+            top: 50%;
             left: 50%;
-            transform: translateX(-50%);
-            background: rgba(10, 10, 30, 0.95);
-            border: 1px solid rgba(100, 150, 255, 0.3);
-            backdrop-filter: blur(20px);
-            padding: 12px 16px;
-            border-radius: 8px;
-            box-shadow: 0 0 50px rgba(100, 150, 255, 0.2);
-            min-width: 500px;
-            max-width: 90%;
-            transition: all 0.3s;
-        }
-
-        @media (max-width: 768px) {
-            #input-container {
-                bottom: env(safe-area-inset-bottom, 20px);
-                left: 10px;
-                right: 10px;
-                min-width: unset;
-                width: calc(100% - 20px);
-                transform: none;
-                max-width: none;
-                padding: 10px 12px;
-            }
-        }
-
-        #input-container.hidden {
-            opacity: 0;
-            transform: translateX(-50%) translateY(100px);
-            pointer-events: none;
-            visibility: hidden;
-        }
-
-        #brain-input {
-            background: transparent;
-            border: none;
-            color: #fff;
-            font-size: 14px;
-            width: 100%;
-            outline: none;
-            font-family: inherit;
-            resize: none;
-            min-height: 20px;
-            max-height: 200px;
-        }
-
-        #brain-input::placeholder {
-            color: rgba(150, 150, 200, 0.5);
-        }
-
-        .info-panel {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(10, 10, 30, 0.8);
-            border: 1px solid rgba(100, 150, 255, 0.2);
-            backdrop-filter: blur(10px);
-            padding: 15px;
-            border-radius: 8px;
+            transform: translate(-50%, -50%);
+            width: 90%;
             max-width: 300px;
-            font-size: 12px;
-            line-height: 1.6;
-            color: rgba(200, 200, 220, 0.8);
-            transition: transform 0.3s;
-        }
-
-        @media (max-width: 768px) {
-            .info-panel {
-                top: 10px;
-                left: 10px;
-                right: 10px;
-                max-width: none;
-                padding: 10px;
-                font-size: 11px;
-                transform: translateY(-100%);
-            }
-
-            .info-panel.visible {
-                transform: translateY(0);
-            }
-        }
-
-        .info-panel h3 {
-            color: rgba(150, 180, 255, 0.9);
-            margin-bottom: 10px;
-            font-size: 14px;
-        }
-
-        .info-panel .controls {
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid rgba(100, 150, 255, 0.1);
-        }
-
-        .info-panel .control-item {
-            margin: 5px 0;
-            color: rgba(180, 180, 200, 0.7);
-        }
-
-        .info-panel .key {
-            color: rgba(150, 180, 255, 0.8);
-            font-weight: bold;
-        }
-
-        /* Back to homepage link */
-        .back-link {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            color: rgba(150, 180, 255, 0.6);
-            text-decoration: none;
-            font-size: 12px;
-            transition: all 0.3s;
-            padding: 8px 16px;
-            border: 1px solid rgba(100, 150, 255, 0.2);
-            border-radius: 4px;
-            background: rgba(10, 10, 30, 0.5);
-            backdrop-filter: blur(10px);
-        }
-
-        @media (max-width: 768px) {
-            .back-link {
-                display: none;
-            }
-        }
-
-        .back-link:hover {
-            color: rgba(200, 220, 255, 0.9);
-            border-color: rgba(150, 180, 255, 0.5);
-            background: rgba(20, 20, 40, 0.8);
-        }
-
-        /* Breathing animation */
-        @keyframes breathe {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 0.8; }
-        }
-
-        .breathing {
-            animation: breathe 30s infinite ease-in-out;
-        }
-
-        #search-container {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(10, 10, 30, 0.8);
-            border: 1px solid rgba(100, 150, 255, 0.2);
-            backdrop-filter: blur(10px);
-            padding: 8px 12px;
-            border-radius: 6px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+            pointer-events: all;
+            z-index: 10;
             display: none;
         }
 
         @media (max-width: 768px) {
-            #search-container {
-                top: auto;
-                bottom: 100px;
-                left: 10px;
-                right: 10px;
-                transform: none;
-                width: auto;
+            #drop-zone {
+                padding: 20px;
             }
         }
 
-        #search-container.active {
+        #drop-zone.active {
             display: block;
         }
 
-        #search-input {
-            background: transparent;
-            border: none;
-            color: rgba(200, 200, 220, 0.9);
-            font-size: 13px;
-            width: 250px;
+        #drop-zone.dragover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+
+        #drop-zone h2 {
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            font-weight: 500;
+        }
+
+        #drop-zone p {
+            font-size: 0.9em;
+            opacity: 0.7;
+            line-height: 1.4;
+        }
+
+        #text-input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
             outline: none;
-            font-family: inherit;
+            transition: all 0.3s ease;
         }
 
-        #search-input::placeholder {
-            color: rgba(150, 150, 200, 0.5);
+        #text-input:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
         }
 
-        @media (max-width: 768px) {
-            #search-input {
-                width: 100%;
-            }
+        #text-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
         }
 
-        /* Mobile menu button */
-        .mobile-menu-btn {
-            display: none;
+        #node-tooltip {
             position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 40px;
-            height: 40px;
-            background: rgba(10, 10, 30, 0.8);
-            border: 1px solid rgba(100, 150, 255, 0.3);
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            font-size: 13px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            z-index: 100;
+            max-width: 300px;
+            word-wrap: break-word;
+        }
+
+        #node-tooltip.visible {
+            opacity: 1;
+        }
+
+        .add-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border-radius: 50%;
-            color: rgba(150, 180, 255, 0.8);
-            font-size: 20px;
-            text-align: center;
-            line-height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            z-index: 50;
+            font-size: 24px;
+        }
+
+        .add-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        #loading {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            font-size: 12px;
+            display: none;
+            z-index: 20;
+        }
+
+        #loading.visible {
+            display: block;
+        }
+
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 11px;
+            opacity: 0.7;
+            z-index: 15;
         }
 
         @media (max-width: 768px) {
-            .mobile-menu-btn {
-                display: block;
-            }
-
-            #status {
-                top: 60px;
-                right: 10px;
-                font-size: 10px;
+            #controls {
+                display: none; /* Hide on mobile to save space */
             }
         }
 
-        /* Prevent scrolling on mobile */
-        @media (max-width: 768px) {
-            body {
-                position: fixed;
-                width: 100%;
-                height: 100%;
-                overflow: hidden;
-            }
+        #controls div {
+            margin-bottom: 5px;
         }
     </style>
 </head>
 <body>
-    <canvas id="galaxy-canvas"></canvas>
-
-    <div id="search-container">
-        <input type="text" id="search-input" placeholder="Search thoughts... (/ or Ctrl+F)">
-    </div>
-
-    <button class="mobile-menu-btn" onclick="document.querySelector('.info-panel').classList.toggle('visible')">
-        ☰
-    </button>
-
-    <div class="info-panel">
-        <h3>Memory Galaxy</h3>
-        <div>Thoughts drift through space, clustering by similarity</div>
-        <div class="controls">
-            <div class="control-item"><span class="key">Click & Drag</span> - Navigate space</div>
-            <div class="control-item"><span class="key">Scroll</span> - Zoom in/out</div>
-            <div class="control-item"><span class="key">Click Node</span> - View thought</div>
-            <div class="control-item"><span class="key">Type</span> - Add new thought</div>
-            <div class="control-item"><span class="key">Ctrl+Enter</span> - Save thought</div>
+    <div id="canvas-container">
+        <div id="drop-zone">
+            <h2>Add thought</h2>
+            <p>Paste text or drag files to create nodes in your thoughtspace</p>
+            <textarea id="text-input" placeholder="Type/paste text and press Enter"></textarea>
         </div>
+        <div id="loading">Processing...</div>
+        <div id="controls">
+            <div>🖱️ Left click + drag: Rotate view</div>
+            <div>🔍 Scroll: Zoom in/out</div>
+            <div>📝 Click nodes to see content</div>
+            <div>➕ Click + to add thoughts</div>
+        </div>
+        <div id="node-tooltip"></div>
+        <div class="add-button">+</div>
     </div>
 
-    <div id="status">
-        <div id="node-count">0 thoughts</div>
-        <div id="time"></div>
-    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script type="module">
+        // Import transformers.js for embeddings
+        import { pipeline } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.6.0';
 
-    <div id="input-container">
-        <textarea id="brain-input"
-                  placeholder="Type your thoughts... (Ctrl+Enter to save)"
-                  rows="1"></textarea>
-    </div>
-
-    <a href="index.html" class="back-link">← Back to Homepage</a>
-
-    <script>
-        class GalaxyBrain {
+        class ThoughtSpace {
             constructor() {
-                this.canvas = document.getElementById('galaxy-canvas');
-                this.ctx = this.canvas.getContext('2d');
-                this.input = document.getElementById('brain-input');
-                this.inputContainer = document.getElementById('input-container');
-                this.searchInput = document.getElementById('search-input');
-                this.searchContainer = document.getElementById('search-container');
-
+                this.scene = null;
+                this.camera = null;
+                this.renderer = null;
+                this.controls = null;
                 this.nodes = [];
-                this.edges = [];
-                this.particles = [];
-                this.stars = [];
-
-                this.camera = {
-                    x: 0,
-                    y: 0,
-                    vx: 0,
-                    vy: 0,
-                    zoom: 1,
-                    targetZoom: 1,
-                    damping: 0.88
-                };
-
-                this.mouse = {
-                    x: 0,
-                    y: 0,
-                    dragStart: null,
-                    hoveredNode: null
-                };
-
-                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth <= 768;
-
-                this.settings = {
-                    nodeGravity: 0.005,
-                    centerGravity: 0.0002,
-                    connectionForce: 0.01,
-                    damping: 0.85,
-                    minNodeSize: isMobile ? 6 : 3,  // Bigger nodes on mobile
-                    maxNodeSize: isMobile ? 25 : 20,
-                    breathingSpeed: 0.0003,
-                    particleCount: isMobile ? 30 : 100,  // Fewer particles on mobile
-                    starCount: isMobile ? 100 : 200,  // Fewer stars on mobile
-                    velocityThreshold: 0.01
-                };
-
-                this.breathingPhase = 0;
-                this.lastSaveTime = Date.now();
-                this.editingNode = null;
-                this.searchTerm = '';
-                this.expandedNode = null;
-                this.tooltip = { visible: false, x: 0, y: 0, text: '' };
-                this.animationFrames = {};
+                this.embedder = null;
+                this.raycaster = new THREE.Raycaster();
+                this.mouse = new THREE.Vector2();
+                this.hoveredNode = null;
 
                 this.init();
+                this.initEmbedder();
+                this.setupEventListeners();
+                this.animate();
             }
 
             init() {
-                this.resizeCanvas();
-                this.createStarField();
-                this.createInitialNodes();
-                this.bindEvents();
-                this.animate();
-                this.updateStatus();
-            }
+                // Scene setup
+                this.scene = new THREE.Scene();
+                this.scene.fog = new THREE.FogExp2(0x000000, 0.00025);
 
-            resizeCanvas() {
-                this.canvas.width = window.innerWidth;
-                this.canvas.height = window.innerHeight;
-            }
+                // Camera setup
+                this.camera = new THREE.PerspectiveCamera(
+                    75,
+                    window.innerWidth / window.innerHeight,
+                    0.1,
+                    10000
+                );
+                this.camera.position.set(0, 0, 100);
 
-            createStarField() {
-                // Create stars that will be rendered in screen space
-                for (let i = 0; i < this.settings.starCount; i++) {
-                    this.stars.push({
-                        // Position as percentage of screen (0-1)
-                        x: Math.random(),
-                        y: Math.random(),
-                        size: Math.random() * 1.5,
-                        brightness: Math.random() * 0.8 + 0.2,
-                        twinkleSpeed: Math.random() * 0.002 + 0.001,  // Much slower twinkle
-                        depth: Math.random() * 0.5 + 0.5  // Parallax depth layer
-                    });
-                }
-            }
+                // Renderer setup
+                this.renderer = new THREE.WebGLRenderer({ antialias: true });
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.renderer.setPixelRatio(window.devicePixelRatio);
+                document.getElementById('canvas-container').appendChild(this.renderer.domElement);
 
-            createInitialNodes() {
-                // Create rich demo nodes with diverse content
-                const demoThoughts = [
-                    {
-                        title: "Time & Memory Theory",
-                        content: "What if time is just memory crystallizing? Each moment becomes solid only in retrospect, and the present is always fluid, always becoming.",
-                        type: "idea",
-                        tags: ["philosophy", "time", "consciousness"],
-                        metadata: { author: "late night thoughts", mood: "contemplative" }
-                    },
-                    {
-                        title: "Q4 Planning Meeting",
-                        content: "Tomorrow 2pm - Discuss roadmap for next quarter. Key points:\n• Resource allocation\n• Timeline review\n• Risk assessment\n• Team expansion needs",
-                        type: "meeting",
-                        tags: ["work", "planning", "team"],
-                        metadata: { attendees: 12, room: "Blue Sky", duration: "2 hours" }
-                    },
-                    {
-                        title: "Dream State Function",
-                        content: "async function dreamState() {\n  const thoughts = await collectDaily();\n  const processed = thoughts.map(t => transform(t));\n  await sleep(28800); // 8 hours\n  return consolidate(processed);\n}",
-                        type: "code",
-                        tags: ["javascript", "async", "creative"],
-                        metadata: { language: "javascript", lines: 6 }
-                    },
-                    {
-                        title: "Neural Network Dreams?",
-                        content: "How do neural networks dream? Do they experience something like our REM sleep when they're being trained? Is backpropagation their form of reflection?",
-                        type: "question",
-                        tags: ["AI", "neuroscience", "deep learning"],
-                        metadata: { research_links: 3, papers_to_read: 5 }
-                    },
-                    {
-                        title: "Consciousness Research",
-                        content: "TODO: Explore consciousness algorithms\n- Read Integrated Information Theory papers\n- Implement simple IIT calculator\n- Compare with Global Workspace Theory\n- Write blog post on findings",
-                        type: "todo",
-                        tags: ["research", "consciousness", "AI"],
-                        metadata: { priority: "high", estimated_hours: 20 }
-                    },
-                    {
-                        title: "Memory Leak Alert",
-                        content: "ERROR in production - memory leak in thoughts.js:142\nStack trace: ThoughtProcessor.accumulate() is not releasing references\nImpact: 2GB/hour memory growth\nFix: Implement WeakMap for thought cache",
-                        type: "error",
-                        tags: ["bug", "production", "urgent"],
-                        metadata: { severity: "high", affected_users: 1200, ticket: "BUG-4521" }
-                    },
-                    {
-                        title: "Computational Universe",
-                        content: "The universe computes itself into existence. Every particle interaction is a calculation, every moment a new iteration of the cosmic algorithm.",
-                        type: "idea",
-                        tags: ["physics", "computation", "philosophy"],
-                        metadata: { inspired_by: "Wolfram's theory", mood: "awestruck" }
-                    },
-                    {
-                        title: "React Hooks Pattern",
-                        content: "const useThought = (initial) => {\n  const [thought, setThought] = useState(initial);\n  const [history, setHistory] = useState([]);\n  \n  const evolve = (transformer) => {\n    setHistory([...history, thought]);\n    setThought(transformer(thought));\n  };\n  \n  return [thought, evolve, history];\n}",
-                        type: "code",
-                        tags: ["react", "patterns", "frontend"],
-                        metadata: { language: "javascript", usefulness: "high" }
-                    },
-                    {
-                        title: "Learning Rust",
-                        content: "Day 15 of learning Rust:\n- Finally understood the borrow checker!\n- Lifetimes make sense now\n- Building a small memory allocator\n- Next: async/await in depth",
-                        type: "learning",
-                        tags: ["rust", "programming", "study"],
-                        metadata: { progress: "30%", confidence: "growing" }
-                    },
-                    {
-                        title: "Product Launch Ideas",
-                        content: "Brainstorm for next product:\n1. AI-powered dream journal\n2. Collaborative mind mapping in VR\n3. Quantum-inspired random idea generator\n4. Thought-to-code translator\n5. Memory palace builder app",
-                        type: "idea",
-                        tags: ["product", "brainstorm", "startup"],
-                        metadata: { potential: "high", feasibility: "medium" }
-                    },
-                    {
-                        title: "Database Migration",
-                        content: "TODO: Migrate user thoughts from PostgreSQL to Neo4j\n- Better for graph relationships\n- Estimated 2M nodes, 10M edges\n- Need to maintain backward compatibility\n- Schedule maintenance window",
-                        type: "todo",
-                        tags: ["database", "migration", "backend"],
-                        metadata: { priority: "medium", risk: "moderate", deadline: "Q1 2025" }
-                    },
-                    {
-                        title: "Morning Meditation",
-                        content: "15 minutes of clarity. Noticed how thoughts arise like bubbles from deep water, each one perfect and temporary. The mind's background process is always running.",
-                        type: "thought",
-                        tags: ["meditation", "mindfulness", "personal"],
-                        metadata: { time: "6:30 AM", feeling: "peaceful" }
-                    },
-                    {
-                        title: "API Rate Limiting",
-                        content: "Implement rate limiting for thought-stream API:\n- 100 requests/minute per user\n- Use Redis for distributed counting\n- Exponential backoff for violations\n- Return 429 with Retry-After header",
-                        type: "code",
-                        tags: ["API", "security", "backend"],
-                        metadata: { implementation: "pending", priority: "high" }
-                    },
-                    {
-                        title: "Team Standup Notes",
-                        content: "Yesterday: Fixed memory leak in thought processor\nToday: Implementing node expansion animations\nBlockers: Need design review for UI changes\nHelp needed: Performance profiling on large graphs",
-                        type: "meeting",
-                        tags: ["standup", "team", "daily"],
-                        metadata: { date: "today", team_size: 8 }
-                    },
-                    {
-                        title: "Emergence Pattern",
-                        content: "Complex behaviors emerge from simple rules. Like Conway's Game of Life, consciousness might be an emergent property of neural interactions following basic principles.",
-                        type: "idea",
-                        tags: ["complexity", "emergence", "systems"],
-                        metadata: { related_to: "consciousness research", certainty: "hypothesis" }
-                    }
-                ];
+                // Controls with touch support
+                this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+                this.controls.enableDamping = true;
+                this.controls.dampingFactor = 0.05;
+                this.controls.rotateSpeed = 0.5;
+                this.controls.zoomSpeed = 0.8;
 
-                // Position nodes in a more interesting spiral pattern
-                demoThoughts.forEach((thought, i) => {
-                    const spiralAngle = (i / demoThoughts.length) * Math.PI * 4;
-                    const spiralRadius = 50 + i * 15;
-
-                    this.addNode({
-                        id: Date.now() + i,
-                        title: thought.title,
-                        content: thought.content,
-                        type: thought.type,
-                        tags: thought.tags,
-                        metadata: thought.metadata,
-                        x: Math.cos(spiralAngle) * spiralRadius + (Math.random() - 0.5) * 30,
-                        y: Math.sin(spiralAngle) * spiralRadius + (Math.random() - 0.5) * 30,
-                        vx: (Math.random() - 0.5) * 0.3,
-                        vy: (Math.random() - 0.5) * 0.3,
-                        size: (window.innerWidth <= 768 ? 10 : 6) + Math.random() * 8,
-                        created: Date.now() - Math.random() * 604800000, // Random time in last week
-                        heat: Math.random() * 0.3
-                    });
-                });
-
-                // Update connections after all nodes are added
-                this.updateConnections();
-            }
-
-            addNode(nodeData) {
-                const node = {
-                    id: nodeData.id || Date.now(),
-                    title: nodeData.title || nodeData.content.substring(0, 50),
-                    content: nodeData.content,
-                    type: nodeData.type || this.getTypeFromContent(nodeData.content),
-                    tags: nodeData.tags || [],
-                    x: nodeData.x || (Math.random() - 0.5) * 200,
-                    y: nodeData.y || (Math.random() - 0.5) * 200,
-                    vx: nodeData.vx || 0,
-                    vy: nodeData.vy || 0,
-                    size: nodeData.size || 8,
-                    color: nodeData.color || this.getColorFromContent(nodeData.content),
-                    created: nodeData.created || Date.now(),
-                    heat: nodeData.heat || 1.0,
-                    pulsePhase: Math.random() * Math.PI * 2,
-                    expanded: false,
-                    expandProgress: 0,
-                    metadata: nodeData.metadata || {}
+                // Touch settings for mobile
+                this.controls.touches = {
+                    ONE: THREE.TOUCH.ROTATE,
+                    TWO: THREE.TOUCH.DOLLY_PAN
                 };
 
-                this.nodes.push(node);
-                this.updateConnections();
-                return node;
+                // Lighting
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
+                this.scene.add(ambientLight);
+
+                const pointLight = new THREE.PointLight(0xffffff, 1);
+                pointLight.position.set(50, 50, 50);
+                this.scene.add(pointLight);
+
+                // Create starfield
+                this.createStarfield();
+
+                // Create the mountain planet home node
+                this.createMountainPlanet();
+
+                // Window resize handler
+                window.addEventListener('resize', () => {
+                    this.camera.aspect = window.innerWidth / window.innerHeight;
+                    this.camera.updateProjectionMatrix();
+                    this.renderer.setSize(window.innerWidth, window.innerHeight);
+                });
             }
 
-            getTypeFromContent(content) {
-                const lower = content.toLowerCase();
-                if (lower.includes('error') || lower.includes('bug')) return 'error';
-                if (lower.includes('question') || lower.includes('?')) return 'question';
-                if (lower.includes('todo') || lower.includes('task')) return 'todo';
-                if (lower.includes('code') || lower.includes('function')) return 'code';
-                if (lower.includes('meeting') || lower.includes('call')) return 'meeting';
-                if (lower.includes('idea') || lower.includes('what if')) return 'idea';
-                if (lower.includes('learn') || lower.includes('study')) return 'learning';
-                return 'thought';
-            }
+            createMountainPlanet() {
+                // Create the main planet sphere
+                const planetGeometry = new THREE.SphereGeometry(8, 32, 32);
+                const planetMaterial = new THREE.MeshPhongMaterial({
+                    color: 0x4a5568,  // Rocky gray color
+                    emissive: 0x1a202c,
+                    emissiveIntensity: 0.3,
+                    shininess: 10
+                });
 
-            getColorFromContent(content) {
-                const type = this.getTypeFromContent(content);
-                const colors = {
-                    'error': 'rgba(255, 100, 100, 0.8)',
-                    'question': 'rgba(255, 200, 100, 0.8)',
-                    'todo': 'rgba(150, 255, 150, 0.8)',
-                    'code': 'rgba(200, 150, 255, 0.8)',
-                    'meeting': 'rgba(100, 200, 255, 0.8)',
-                    'idea': 'rgba(255, 150, 200, 0.8)',
-                    'learning': 'rgba(150, 255, 200, 0.8)',
-                    'thought': 'rgba(150, 180, 255, 0.8)'
+                const planet = new THREE.Mesh(planetGeometry, planetMaterial);
+                planet.position.set(-30, 0, -50); // Position it off to the side
+
+                // Create mountain peak as a cone
+                const peakGeometry = new THREE.ConeGeometry(3, 6, 8);
+                const peakMaterial = new THREE.MeshPhongMaterial({
+                    color: 0xffffff,  // White snow
+                    emissive: 0xe0e0e0,
+                    emissiveIntensity: 0.2
+                });
+
+                const peak = new THREE.Mesh(peakGeometry, peakMaterial);
+                peak.position.set(-30, 11, -50); // Position on top of planet
+
+                // Create snow cap gradient
+                const snowCapGeometry = new THREE.ConeGeometry(3.5, 2, 8);
+                const snowCapMaterial = new THREE.MeshPhongMaterial({
+                    color: 0xf0f0f0,
+                    emissive: 0xffffff,
+                    emissiveIntensity: 0.1,
+                    opacity: 0.9,
+                    transparent: true
+                });
+
+                const snowCap = new THREE.Mesh(snowCapGeometry, snowCapMaterial);
+                snowCap.position.set(-30, 9, -50);
+
+                // Create atmospheric fog sphere around planet
+                const atmosphereGeometry = new THREE.SphereGeometry(12, 32, 32);
+                const atmosphereMaterial = new THREE.MeshBasicMaterial({
+                    color: 0x88ccff,
+                    transparent: true,
+                    opacity: 0.1,
+                    side: THREE.BackSide
+                });
+
+                const atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
+                atmosphere.position.set(-30, 0, -50);
+
+                // Group all parts together
+                const mountainPlanetGroup = new THREE.Group();
+                mountainPlanetGroup.add(planet);
+                mountainPlanetGroup.add(peak);
+                mountainPlanetGroup.add(snowCap);
+                mountainPlanetGroup.add(atmosphere);
+
+                this.scene.add(mountainPlanetGroup);
+
+                // Store reference for interaction
+                this.mountainPlanet = {
+                    group: mountainPlanetGroup,
+                    planet: planet,
+                    peak: peak,
+                    link: 'asaschaeffer.com', // Change this to your desired URL
+                    rotationSpeed: 0.001
                 };
-                return colors[type] || colors['thought'];
+
+                // Add to nodes array for hover detection
+                planet.userData = {
+                    isHome: true,
+                    text: 'Home - Click to explore',
+                    preview: 'Home - Click to explore',
+                    link: 'https://asaschaeffer.com' // Change this to your desired URL
+                };
+                this.nodes.push(planet);
             }
 
-            updateConnections() {
-                // Similarity-based connections with improved algorithm
-                this.edges = [];
-                for (let i = 0; i < this.nodes.length; i++) {
-                    for (let j = i + 1; j < this.nodes.length; j++) {
-                        const similarity = this.calculateSimilarity(this.nodes[i].content, this.nodes[j].content);
-                        if (similarity > 0.25) {
-                            this.edges.push({
-                                from: i,
-                                to: j,
-                                strength: similarity
-                            });
-                        }
-                    }
+            createStarfield() {
+                const geometry = new THREE.BufferGeometry();
+                const vertices = [];
+                const colors = [];
+                const sizes = [];
+
+                // Store individual star properties
+                this.starData = [];
+                const starCount = 5000;
+
+                // Reduce star count on mobile for performance
+                const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                const actualStarCount = isMobileDevice ? 2000 : starCount;
+
+                for (let i = 0; i < actualStarCount; i++) {
+                    vertices.push(
+                        (Math.random() - 0.5) * 2000,
+                        (Math.random() - 0.5) * 2000,
+                        (Math.random() - 0.5) * 2000
+                    );
+
+                    const color = new THREE.Color();
+                    color.setHSL(Math.random() * 0.2 + 0.5, 0.5, Math.random() * 0.5 + 0.5);
+                    colors.push(color.r, color.g, color.b);
+
+                    const baseSize = 0.5 + Math.random() * 1.5;
+                    sizes.push(baseSize);
+
+                    // Each star gets its own twinkle properties
+                    this.starData.push({
+                        baseSize: baseSize,
+                        twinkleSpeed: 0.05 + Math.random() * 0.15, // 5-20 second cycles
+                        twinklePhase: Math.random() * Math.PI * 2,
+                        twinkleOffset: Math.random() * 100, // Random time offset
+                        baseOpacity: 0.1 + Math.random() * 0.2 // Vary base dimness
+                    });
+                }
+
+                geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+                geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+                geometry.setAttribute('size', new THREE.Float32BufferAttribute(sizes, 1));
+
+                // Store original colors for reference
+                this.originalColors = new Float32Array(colors);
+
+                const material = new THREE.PointsMaterial({
+                    size: 1.5,
+                    vertexColors: true,
+                    sizeAttenuation: true,
+                    blending: THREE.AdditiveBlending,
+                    transparent: true,
+                    opacity: 0.8
+                });
+
+                this.stars = new THREE.Points(geometry, material);
+                this.scene.add(this.stars);
+            }
+
+            async initEmbedder() {
+                try {
+                    console.log('Initializing embedder...');
+                    document.getElementById('loading').classList.add('visible');
+
+                    // Use feature-extraction pipeline for embeddings
+                    this.embedder = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
+
+                    console.log('Embedder ready!');
+                    document.getElementById('loading').classList.remove('visible');
+                } catch (error) {
+                    console.error('Failed to initialize embedder:', error);
+                    // Fallback to random positioning if embedder fails
+                    this.embedder = null;
                 }
             }
 
-            extractKeywords(text) {
-                const stopWords = ['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'is', 'was', 'are', 'were', 'been', 'be', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'should', 'could', 'may', 'might', 'must', 'can', 'this', 'that', 'these', 'those', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'what', 'which', 'who', 'when', 'where', 'why', 'how', 'all', 'each', 'every', 'both', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 'just'];
-                return text.toLowerCase()
-                    .split(/\s+/)
-                    .filter(word => word.length > 2 && !stopWords.includes(word));
-            }
+            async createNode(text) {
+                // Show loading
+                document.getElementById('loading').classList.add('visible');
 
-            calculateSimilarity(text1, text2) {
-                const words1 = this.extractKeywords(text1);
-                const words2 = this.extractKeywords(text2);
+                let position;
 
-                if (words1.length === 0 || words2.length === 0) {
-                    return 0;
-                }
+                if (this.embedder) {
+                    try {
+                        // Generate embedding
+                        const output = await this.embedder(text, { pooling: 'mean', normalize: true });
+                        const embedding = Array.from(output.data);
 
-                // Jaccard similarity
-                const set1 = new Set(words1);
-                const set2 = new Set(words2);
-                const intersection = new Set([...set1].filter(x => set2.has(x)));
-                const union = new Set([...set1, ...set2]);
-
-                return intersection.size / union.size;
-            }
-
-            bindEvents() {
-                // Canvas interactions - Mouse
-                this.canvas.addEventListener('mousedown', (e) => this.onMouseDown(e));
-                this.canvas.addEventListener('mousemove', (e) => this.onMouseMove(e));
-                this.canvas.addEventListener('mouseup', (e) => this.onMouseUp(e));
-                this.canvas.addEventListener('wheel', (e) => this.onWheel(e));
-
-                // Touch events for mobile
-                this.canvas.addEventListener('touchstart', (e) => this.onTouchStart(e), { passive: false });
-                this.canvas.addEventListener('touchmove', (e) => this.onTouchMove(e), { passive: false });
-                this.canvas.addEventListener('touchend', (e) => this.onTouchEnd(e), { passive: false });
-
-                // Variables for pinch zoom
-                this.touches = [];
-                this.lastTouchDistance = 0;
-
-                // Window resize
-                window.addEventListener('resize', () => this.resizeCanvas());
-
-                // Input handling
-                this.input.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter' && e.ctrlKey) {
-                        e.preventDefault();
-                        this.saveThought();
+                        // Simple projection to 3D using first 3 principal components
+                        // In a real implementation, you'd use PCA or UMAP
+                        position = this.projectTo3D(embedding);
+                    } catch (error) {
+                        console.error('Embedding failed:', error);
+                        position = this.randomPosition();
                     }
-                });
-
-                this.input.addEventListener('input', () => {
-                    this.input.style.height = 'auto';
-                    this.input.style.height = Math.min(200, this.input.scrollHeight) + 'px';
-                });
-
-                // Show/hide input on key press
-                document.addEventListener('keydown', (e) => {
-                    // Escape closes expanded node
-                    if (e.key === 'Escape' && this.expandedNode && e.target === document.body) {
-                        e.preventDefault();
-                        this.collapseNode();
-                        return;
-                    }
-                    // Search shortcuts
-                    if ((e.key === '/' || (e.ctrlKey && e.key === 'f')) && e.target === document.body) {
-                        e.preventDefault();
-                        this.searchContainer.classList.add('active');
-                        this.searchInput.focus();
-                        this.searchInput.select();
-                    }
-                    // Regular typing for new thoughts (not on mobile - they should use button)
-                    else if (e.target === document.body && !e.ctrlKey && !e.altKey && !e.metaKey && e.key !== '/' && window.innerWidth > 768) {
-                        this.inputContainer.classList.remove('hidden');
-                        this.input.focus();
-                    }
-                });
-
-                // Add mobile input button
-                if (window.innerWidth <= 768) {
-                    const addButton = document.createElement('button');
-                    addButton.style.cssText = `
-                        position: fixed;
-                        bottom: 30px;
-                        right: 20px;
-                        width: 56px;
-                        height: 56px;
-                        border-radius: 50%;
-                        background: rgba(100, 150, 255, 0.9);
-                        border: none;
-                        color: white;
-                        font-size: 28px;
-                        line-height: 56px;
-                        text-align: center;
-                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-                        z-index: 1500;
-                        cursor: pointer;
-                    `;
-                    addButton.innerHTML = '+';
-                    addButton.onclick = () => {
-                        this.inputContainer.classList.remove('hidden');
-                        this.input.focus();
-                    };
-                    document.body.appendChild(addButton);
-                }
-
-                // Hide input on escape
-                this.input.addEventListener('keydown', (e) => {
-                    if (e.key === 'Escape') {
-                        this.input.blur();
-                        this.inputContainer.classList.add('hidden');
-                    }
-                });
-
-                // Search input handling
-                this.searchInput.addEventListener('input', (e) => {
-                    this.searchTerm = e.target.value.toLowerCase();
-                    this.filterNodes();
-                });
-
-                this.searchInput.addEventListener('keydown', (e) => {
-                    if (e.key === 'Escape') {
-                        this.searchTerm = '';
-                        this.searchInput.value = '';
-                        this.searchContainer.classList.remove('active');
-                        this.filterNodes();
-                    }
-                });
-            }
-
-            saveThought() {
-                const content = this.input.value.trim();
-                if (!content) return;
-
-                if (this.editingNode) {
-                    // Edit existing node
-                    this.editingNode.content = content;
-                    this.editingNode.color = this.getColorFromContent(content);
-                    this.editingNode.heat = 1.0; // Reheat the node
-
-                    // Create a pulse effect
-                    this.createPulse(this.editingNode.x, this.editingNode.y);
-
-                    this.editingNode = null;
                 } else {
-                    // Create new node
-                    const node = this.addNode({
-                        content: content,
-                        x: (Math.random() - 0.5) * 100,
-                        y: (Math.random() - 0.5) * 100,
-                        vx: (Math.random() - 0.5) * 2,
-                        vy: (Math.random() - 0.5) * 2
-                    });
-
-                    // Create a pulse effect
-                    this.createPulse(node.x, node.y);
+                    position = this.randomPosition();
                 }
 
-                // Clear input
-                this.input.value = '';
-                this.input.style.height = 'auto';
+                // Create sphere geometry
+                const geometry = new THREE.SphereGeometry(2, 32, 32);
+                const color = new THREE.Color();
+                color.setHSL(Math.random(), 0.7, 0.5);
 
-                // Update status
-                this.lastSaveTime = Date.now();
-                this.updateStatus();
-                this.updateConnections();
+                const material = new THREE.MeshPhongMaterial({
+                    color: color,
+                    emissive: color,
+                    emissiveIntensity: 0.2,
+                    shininess: 100
+                });
 
-                // Store in localStorage for persistence
-                this.saveToLocalStorage();
-            }
+                const sphere = new THREE.Mesh(geometry, material);
+                sphere.position.set(position.x, position.y, position.z);
 
-            createPulse(x, y) {
-                for (let i = 0; i < 20; i++) {
-                    const angle = (i / 20) * Math.PI * 2;
-                    this.particles.push({
-                        x: x,
-                        y: y,
-                        vx: Math.cos(angle) * 3,
-                        vy: Math.sin(angle) * 3,
-                        life: 1.0,
-                        color: 'rgba(150, 200, 255, 0.8)'
-                    });
-                }
-            }
-
-            onMouseDown(e) {
-                const rect = this.canvas.getBoundingClientRect();
-                const mouseX = e.clientX - rect.left;
-                const mouseY = e.clientY - rect.top;
-
-                // Check if clicking on a node
-                const worldPos = this.screenToWorld(mouseX, mouseY);
-                const clickedNode = this.getNodeAt(worldPos.x, worldPos.y);
-
-                if (clickedNode) {
-                    if (this.expandedNode === clickedNode) {
-                        // Check if clicking close button area
-                        const expandedPos = this.worldToScreen(clickedNode.x, clickedNode.y);
-                        const closeButtonX = expandedPos.x + 140; // Top-right of expanded node
-                        const closeButtonY = expandedPos.y - 110;
-                        const closeButtonSize = 20;
-
-                        if (Math.abs(mouseX - closeButtonX) < closeButtonSize &&
-                            Math.abs(mouseY - closeButtonY) < closeButtonSize) {
-                            this.collapseNode();
-                        }
-                        // Otherwise, clicking on expanded node does nothing (allows interaction)
-                    } else if (this.expandedNode) {
-                        // Switch to different node
-                        this.collapseNode();
-                        setTimeout(() => this.expandNode(clickedNode), 200);
-                    } else {
-                        // Expand the clicked node
-                        this.expandNode(clickedNode);
-                    }
-                } else if (!this.expandedNode) {
-                    // Only start drag if no node is expanded
-                    this.mouse.dragStart = { x: mouseX, y: mouseY, cameraX: this.camera.x, cameraY: this.camera.y };
-                }
-                // Clicking outside expanded node no longer closes it
-            }
-
-            onMouseMove(e) {
-                const rect = this.canvas.getBoundingClientRect();
-                this.mouse.x = e.clientX - rect.left;
-                this.mouse.y = e.clientY - rect.top;
-
-                if (this.mouse.dragStart) {
-                    const dx = this.mouse.x - this.mouse.dragStart.x;
-                    const dy = this.mouse.y - this.mouse.dragStart.y;
-                    // Use immediate response for dragging, not velocity
-                    this.camera.x = this.mouse.dragStart.cameraX + dx / this.camera.zoom;
-                    this.camera.y = this.mouse.dragStart.cameraY + dy / this.camera.zoom;
-                } else {
-                    // Check for hover
-                    const worldPos = this.screenToWorld(this.mouse.x, this.mouse.y);
-                    const hoveredNode = this.getNodeAt(worldPos.x, worldPos.y);
-                    this.mouse.hoveredNode = hoveredNode;
-                    this.canvas.classList.toggle('over-node', !!hoveredNode);
-
-                    // Update tooltip
-                    if (hoveredNode) {
-                        this.tooltip.visible = true;
-                        this.tooltip.x = this.mouse.x;
-                        this.tooltip.y = this.mouse.y - 30;
-                        this.tooltip.text = hoveredNode.title;
-                    } else {
-                        this.tooltip.visible = false;
-                    }
-                }
-            }
-
-            onMouseUp(e) {
-                this.mouse.dragStart = null;
-                // Removed momentum to fix position snap
-            }
-
-            onWheel(e) {
-                e.preventDefault();
-                const zoomSpeed = 1.1;
-                if (e.deltaY < 0) {
-                    this.camera.targetZoom *= zoomSpeed;
-                } else {
-                    this.camera.targetZoom /= zoomSpeed;
-                }
-                this.camera.targetZoom = Math.max(0.1, Math.min(5, this.camera.targetZoom));
-            }
-
-            onTouchStart(e) {
-                e.preventDefault();
-                this.touches = Array.from(e.touches);
-
-                if (this.touches.length === 1) {
-                    // Single touch - same as mouse down
-                    const touch = this.touches[0];
-                    const rect = this.canvas.getBoundingClientRect();
-                    const touchX = touch.clientX - rect.left;
-                    const touchY = touch.clientY - rect.top;
-
-                    // Check if tapping on a node
-                    const worldPos = this.screenToWorld(touchX, touchY);
-                    const tappedNode = this.getNodeAt(worldPos.x, worldPos.y);
-
-                    if (tappedNode) {
-                        if (this.expandedNode === tappedNode) {
-                            // Check if tapping close button area
-                            const expandedPos = this.worldToScreen(tappedNode.x, tappedNode.y);
-                            const closeButtonX = expandedPos.x + 140;
-                            const closeButtonY = expandedPos.y - 110;
-                            const closeButtonSize = 30; // Bigger touch target
-
-                            if (Math.abs(touchX - closeButtonX) < closeButtonSize &&
-                                Math.abs(touchY - closeButtonY) < closeButtonSize) {
-                                this.collapseNode();
-                            }
-                        } else if (this.expandedNode) {
-                            this.collapseNode();
-                            setTimeout(() => this.expandNode(tappedNode), 200);
-                        } else {
-                            this.expandNode(tappedNode);
-                        }
-                    } else if (!this.expandedNode) {
-                        // Start drag
-                        this.mouse.dragStart = { x: touchX, y: touchY, cameraX: this.camera.x, cameraY: this.camera.y };
-                    }
-                } else if (this.touches.length === 2) {
-                    // Two finger touch - prepare for pinch zoom
-                    const dx = this.touches[0].clientX - this.touches[1].clientX;
-                    const dy = this.touches[0].clientY - this.touches[1].clientY;
-                    this.lastTouchDistance = Math.hypot(dx, dy);
-                }
-            }
-
-            onTouchMove(e) {
-                e.preventDefault();
-                this.touches = Array.from(e.touches);
-
-                if (this.touches.length === 1 && this.mouse.dragStart) {
-                    // Single touch drag
-                    const touch = this.touches[0];
-                    const rect = this.canvas.getBoundingClientRect();
-                    const touchX = touch.clientX - rect.left;
-                    const touchY = touch.clientY - rect.top;
-
-                    const dx = touchX - this.mouse.dragStart.x;
-                    const dy = touchY - this.mouse.dragStart.y;
-                    this.camera.x = this.mouse.dragStart.cameraX + dx / this.camera.zoom;
-                    this.camera.y = this.mouse.dragStart.cameraY + dy / this.camera.zoom;
-                } else if (this.touches.length === 2) {
-                    // Pinch zoom
-                    const dx = this.touches[0].clientX - this.touches[1].clientX;
-                    const dy = this.touches[0].clientY - this.touches[1].clientY;
-                    const distance = Math.hypot(dx, dy);
-
-                    if (this.lastTouchDistance > 0) {
-                        const scale = distance / this.lastTouchDistance;
-                        this.camera.targetZoom *= scale;
-                        this.camera.targetZoom = Math.max(0.1, Math.min(5, this.camera.targetZoom));
-                    }
-
-                    this.lastTouchDistance = distance;
-                }
-            }
-
-            onTouchEnd(e) {
-                e.preventDefault();
-                this.touches = Array.from(e.touches);
-
-                if (this.touches.length === 0) {
-                    this.mouse.dragStart = null;
-                    this.lastTouchDistance = 0;
-                } else if (this.touches.length === 1) {
-                    // Going from 2 fingers to 1 - restart drag
-                    const touch = this.touches[0];
-                    const rect = this.canvas.getBoundingClientRect();
-                    const touchX = touch.clientX - rect.left;
-                    const touchY = touch.clientY - rect.top;
-                    this.mouse.dragStart = { x: touchX, y: touchY, cameraX: this.camera.x, cameraY: this.camera.y };
-                }
-            }
-
-            REMOVED_onDoubleClick(e) {
-                const rect = this.canvas.getBoundingClientRect();
-                const mouseX = e.clientX - rect.left;
-                const mouseY = e.clientY - rect.top;
-
-                // Check if double-clicking on expanded node content area
-                if (this.expandedNode) {
-                    const expandedPos = this.worldToScreen(this.expandedNode.x, this.expandedNode.y);
-                    const expandedWidth = 320;
-                    const expandedHeight = 240;
-
-                    // Check if click is within expanded node bounds
-                    if (Math.abs(mouseX - expandedPos.x) < expandedWidth / 2 &&
-                        Math.abs(mouseY - expandedPos.y) < expandedHeight / 2) {
-                        // Start editing this node
-                        this.startEditingNode(this.expandedNode);
-                    }
-                }
-            }
-
-            startEditingNode(node) {
-                // Create an overlay with input fields
-                const overlay = document.createElement('div');
-                overlay.style.cssText = `
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    background: rgba(0, 0, 0, 0.7);
-                    z-index: 3000;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                `;
-
-                const editor = document.createElement('div');
-                editor.style.cssText = `
-                    background: rgba(20, 20, 40, 0.98);
-                    border: 1px solid rgba(100, 150, 255, 0.5);
-                    border-radius: 8px;
-                    padding: 20px;
-                    width: 500px;
-                    max-width: 90%;
-                    box-shadow: 0 0 50px rgba(100, 150, 255, 0.3);
-                `;
-
-                // Title input
-                const titleLabel = document.createElement('div');
-                titleLabel.textContent = 'Title:';
-                titleLabel.style.cssText = 'color: rgba(150, 180, 255, 0.9); font-size: 12px; margin-bottom: 5px; font-family: Monaco, monospace;';
-                editor.appendChild(titleLabel);
-
-                const titleInput = document.createElement('input');
-                titleInput.type = 'text';
-                titleInput.value = node.title || '';
-                titleInput.style.cssText = `
-                    width: 100%;
-                    background: rgba(10, 10, 30, 0.8);
-                    border: 1px solid rgba(100, 150, 255, 0.3);
-                    color: #fff;
-                    padding: 8px;
-                    margin-bottom: 15px;
-                    font-family: Monaco, monospace;
-                    font-size: 14px;
-                    border-radius: 4px;
-                    outline: none;
-                `;
-                editor.appendChild(titleInput);
-
-                // Content textarea
-                const contentLabel = document.createElement('div');
-                contentLabel.textContent = 'Content:';
-                contentLabel.style.cssText = 'color: rgba(150, 180, 255, 0.9); font-size: 12px; margin-bottom: 5px; font-family: Monaco, monospace;';
-                editor.appendChild(contentLabel);
-
-                const contentInput = document.createElement('textarea');
-                contentInput.value = node.content || '';
-                contentInput.style.cssText = `
-                    width: 100%;
-                    height: 200px;
-                    background: rgba(10, 10, 30, 0.8);
-                    border: 1px solid rgba(100, 150, 255, 0.3);
-                    color: #fff;
-                    padding: 8px;
-                    margin-bottom: 15px;
-                    font-family: Monaco, monospace;
-                    font-size: 13px;
-                    border-radius: 4px;
-                    outline: none;
-                    resize: vertical;
-                `;
-                editor.appendChild(contentInput);
-
-                // Buttons
-                const buttonContainer = document.createElement('div');
-                buttonContainer.style.cssText = 'display: flex; gap: 10px; justify-content: flex-end;';
-
-                const cancelBtn = document.createElement('button');
-                cancelBtn.textContent = 'Cancel';
-                cancelBtn.style.cssText = `
-                    background: rgba(150, 150, 150, 0.2);
-                    border: 1px solid rgba(150, 150, 150, 0.5);
-                    color: rgba(200, 200, 200, 0.9);
-                    padding: 8px 20px;
-                    border-radius: 4px;
-                    cursor: pointer;
-                    font-family: Monaco, monospace;
-                    font-size: 12px;
-                `;
-                cancelBtn.onclick = () => overlay.remove();
-
-                const saveBtn = document.createElement('button');
-                saveBtn.textContent = 'Save';
-                saveBtn.style.cssText = `
-                    background: rgba(100, 150, 255, 0.2);
-                    border: 1px solid rgba(100, 150, 255, 0.5);
-                    color: rgba(200, 220, 255, 0.9);
-                    padding: 8px 20px;
-                    border-radius: 4px;
-                    cursor: pointer;
-                    font-family: Monaco, monospace;
-                    font-size: 12px;
-                `;
-                saveBtn.onclick = () => {
-                    node.title = titleInput.value || node.content.substring(0, 50);
-                    node.content = contentInput.value;
-                    node.type = this.getTypeFromContent(node.content);
-                    node.color = this.getColorFromContent(node.content);
-                    node.heat = 1.0; // Reheat on edit
-                    this.updateConnections();
-                    this.saveToLocalStorage();
-                    overlay.remove();
+                // Store metadata
+                sphere.userData = {
+                    text: text,
+                    id: Date.now(),
+                    velocity: new THREE.Vector3(
+                        (Math.random() - 0.5) * 0.02,
+                        (Math.random() - 0.5) * 0.02,
+                        (Math.random() - 0.5) * 0.02
+                    ),
+                    originalColor: color.clone(),
+                    preview: text.substring(0, 100) + (text.length > 100 ? '...' : '')
                 };
 
-                buttonContainer.appendChild(cancelBtn);
-                buttonContainer.appendChild(saveBtn);
-                editor.appendChild(buttonContainer);
+                this.scene.add(sphere);
+                this.nodes.push(sphere);
 
-                overlay.appendChild(editor);
-                document.body.appendChild(overlay);
+                // Hide input after adding node
+                document.getElementById('drop-zone').classList.remove('active');
+                document.getElementById('loading').classList.remove('visible');
 
-                // Focus title input
-                titleInput.focus();
-                titleInput.select();
-
-                // Handle escape key
-                const handleEscape = (e) => {
-                    if (e.key === 'Escape') {
-                        overlay.remove();
-                        document.removeEventListener('keydown', handleEscape);
-                    }
-                };
-                document.addEventListener('keydown', handleEscape);
+                // Animate node appearance
+                sphere.scale.set(0, 0, 0);
+                this.animateNodeAppearance(sphere);
             }
 
-            screenToWorld(x, y) {
+            projectTo3D(embedding) {
+                // Simple projection using first 3 dimensions scaled
+                // In production, use proper dimensionality reduction
+                const scale = 50;
                 return {
-                    x: (x - this.canvas.width / 2) / this.camera.zoom - this.camera.x,
-                    y: (y - this.canvas.height / 2) / this.camera.zoom - this.camera.y
+                    x: (embedding[0] || 0) * scale,
+                    y: (embedding[1] || 0) * scale,
+                    z: (embedding[2] || 0) * scale
                 };
             }
 
-            worldToScreen(x, y) {
+            randomPosition() {
                 return {
-                    x: (x + this.camera.x) * this.camera.zoom + this.canvas.width / 2,
-                    y: (y + this.camera.y) * this.camera.zoom + this.canvas.height / 2
+                    x: (Math.random() - 0.5) * 100,
+                    y: (Math.random() - 0.5) * 100,
+                    z: (Math.random() - 0.5) * 100
                 };
             }
 
-            getNodeAt(x, y) {
-                for (let node of this.nodes) {
-                    const dist = Math.hypot(node.x - x, node.y - y);
-                    if (dist < node.size + 5) {
-                        return node;
-                    }
-                }
-                return null;
-            }
+            animateNodeAppearance(node) {
+                const targetScale = 1;
+                const duration = 1000;
+                const start = Date.now();
 
-            expandNode(node) {
-                this.expandedNode = node;
-                node.expanded = true;
-                node.expandStartTime = Date.now();
-                this.animateExpansion();
-                this.createEditableOverlay(node);
-            }
-
-            createEditableOverlay(node) {
-                // Create DOM overlay for editing
-                const overlay = document.createElement('div');
-                overlay.id = 'node-editor-overlay';
-                overlay.style.cssText = `
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    pointer-events: none;
-                    z-index: 2000;
-                `;
-
-                // Calculate position for the editor
-                const screenPos = this.worldToScreen(node.x, node.y);
-                const isMobile = window.innerWidth <= 768;
-
-                const editor = document.createElement('div');
-
-                if (isMobile) {
-                    // Mobile: Full-width card at center of screen
-                    editor.style.cssText = `
-                        position: fixed;
-                        left: 10px;
-                        right: 10px;
-                        top: 50%;
-                        transform: translateY(-50%);
-                        max-width: 400px;
-                        margin: 0 auto;
-                        height: auto;
-                        max-height: 80vh;
-                        overflow-y: auto;
-                        background: rgba(20, 20, 40, 0.98);
-                        border: 2px solid ${node.color};
-                        border-radius: 12px;
-                        padding: 20px;
-                        box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
-                        pointer-events: auto;
-                    `;
-                } else {
-                    // Desktop: Position at node location
-                    editor.style.cssText = `
-                        position: absolute;
-                        left: ${Math.max(10, Math.min(screenPos.x - 160, window.innerWidth - 340))}px;
-                        top: ${Math.max(10, Math.min(screenPos.y - 120, window.innerHeight - 260))}px;
-                        width: 320px;
-                        height: 240px;
-                        background: rgba(20, 20, 40, 0.98);
-                        border: 2px solid ${node.color};
-                        border-radius: 8px;
-                        padding: 20px;
-                        box-shadow: 0 0 50px rgba(100, 150, 255, 0.3);
-                        pointer-events: auto;
-                    `;
-                }
-
-                // Close button
-                const closeBtn = document.createElement('div');
-                closeBtn.innerHTML = '×';
-                closeBtn.style.cssText = `
-                    position: absolute;
-                    right: 10px;
-                    top: 10px;
-                    width: 25px;
-                    height: 25px;
-                    border-radius: 50%;
-                    background: rgba(255, 100, 100, 0.1);
-                    color: rgba(255, 150, 150, 0.8);
-                    font-size: 20px;
-                    line-height: 22px;
-                    text-align: center;
-                    cursor: pointer;
-                `;
-                closeBtn.onmouseover = () => closeBtn.style.background = 'rgba(255, 100, 100, 0.2)';
-                closeBtn.onmouseout = () => closeBtn.style.background = 'rgba(255, 100, 100, 0.1)';
-                closeBtn.onclick = () => {
-                    this.collapseNode();
-                    overlay.remove();
-                };
-                editor.appendChild(closeBtn);
-
-                // Title input
-                const titleInput = document.createElement('input');
-                titleInput.type = 'text';
-                titleInput.value = node.title || '';
-                titleInput.placeholder = 'Title';
-                titleInput.style.cssText = `
-                    width: 100%;
-                    background: rgba(10, 10, 30, 0.5);
-                    border: none;
-                    border-bottom: 1px solid rgba(100, 150, 255, 0.3);
-                    color: #fff;
-                    padding: 5px;
-                    margin-bottom: 10px;
-                    font-family: Monaco, monospace;
-                    font-size: 16px;
-                    font-weight: bold;
-                    outline: none;
-                `;
-                titleInput.oninput = () => {
-                    node.title = titleInput.value || node.content.substring(0, 50);
-                };
-                editor.appendChild(titleInput);
-
-                // Type/tags display
-                const typeTag = document.createElement('div');
-                typeTag.style.cssText = `
-                    color: ${node.color};
-                    font-size: 10px;
-                    font-family: Monaco, monospace;
-                    margin-bottom: 10px;
-                    text-transform: uppercase;
-                `;
-                typeTag.textContent = node.type;
-                editor.appendChild(typeTag);
-
-                // Content textarea
-                const contentInput = document.createElement('textarea');
-                contentInput.value = node.content || '';
-                contentInput.placeholder = 'Your thoughts...';
-                contentInput.style.cssText = `
-                    width: 100%;
-                    height: 120px;
-                    background: rgba(10, 10, 30, 0.3);
-                    border: 1px solid rgba(100, 150, 255, 0.2);
-                    color: rgba(200, 200, 220, 0.9);
-                    padding: 8px;
-                    font-family: Monaco, monospace;
-                    font-size: 12px;
-                    border-radius: 4px;
-                    outline: none;
-                    resize: none;
-                `;
-                contentInput.oninput = () => {
-                    node.content = contentInput.value;
-                    node.type = this.getTypeFromContent(node.content);
-                    node.color = this.getColorFromContent(node.content);
-                    typeTag.textContent = node.type;
-                    typeTag.style.color = node.color;
-                    editor.style.borderColor = node.color;
-                    this.updateConnections();
-                    this.saveToLocalStorage();
-                };
-                editor.appendChild(contentInput);
-
-                // Tags display
-                if (node.tags && node.tags.length > 0) {
-                    const tagsDiv = document.createElement('div');
-                    tagsDiv.style.cssText = `
-                        margin-top: 10px;
-                        font-size: 10px;
-                        font-family: Monaco, monospace;
-                        color: rgba(150, 200, 255, 0.7);
-                    `;
-                    tagsDiv.textContent = node.tags.map(t => '#' + t).join(' ');
-                    editor.appendChild(tagsDiv);
-                }
-
-                overlay.appendChild(editor);
-                document.body.appendChild(overlay);
-
-                // Store reference for cleanup
-                this.editorOverlay = overlay;
-
-                // Focus title
-                titleInput.focus();
-                titleInput.select();
-            }
-
-            collapseNode() {
-                if (this.expandedNode) {
-                    this.expandedNode.expanded = false;
-                    this.expandedNode.collapseStartTime = Date.now();
-                    this.animateCollapse();
-
-                    // Remove editor overlay
-                    if (this.editorOverlay) {
-                        this.editorOverlay.remove();
-                        this.editorOverlay = null;
-                    }
-                }
-            }
-
-            animateExpansion() {
                 const animate = () => {
-                    if (!this.expandedNode || !this.expandedNode.expanded) return;
-
-                    const elapsed = Date.now() - this.expandedNode.expandStartTime;
-                    const duration = 300;
+                    const elapsed = Date.now() - start;
                     const progress = Math.min(elapsed / duration, 1);
 
-                    // Easing function for smooth animation
-                    this.expandedNode.expandProgress = this.easeOutCubic(progress);
+                    // Easing function
+                    const easeOut = 1 - Math.pow(1 - progress, 3);
+
+                    node.scale.set(easeOut * targetScale, easeOut * targetScale, easeOut * targetScale);
 
                     if (progress < 1) {
                         requestAnimationFrame(animate);
                     }
                 };
+
                 animate();
             }
 
-            animateCollapse() {
-                const node = this.expandedNode;
-                const animate = () => {
-                    if (!node.collapseStartTime) return;
+            setupEventListeners() {
+                const dropZone = document.getElementById('drop-zone');
+                const textInput = document.getElementById('text-input');
+                const addButton = document.querySelector('.add-button');
+                const tooltip = document.getElementById('node-tooltip');
+                const container = document.getElementById('canvas-container');
 
-                    const elapsed = Date.now() - node.collapseStartTime;
-                    const duration = 200;
-                    const progress = Math.min(elapsed / duration, 1);
-
-                    node.expandProgress = 1 - this.easeOutCubic(progress);
-
-                    if (progress >= 1) {
-                        node.expandProgress = 0;
-                        delete node.collapseStartTime;
-                        if (this.expandedNode === node) {
-                            this.expandedNode = null;
-                        }
-                    } else {
-                        requestAnimationFrame(animate);
-                    }
-                };
-                animate();
-            }
-
-            easeOutCubic(t) {
-                return 1 - Math.pow(1 - t, 3);
-            }
-
-            showNodeContent(node) {
-                // Create a temporary display of the content
-                const display = document.createElement('div');
-                display.style.cssText = `
-                    position: fixed;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    background: rgba(10, 10, 30, 0.95);
-                    border: 1px solid rgba(100, 150, 255, 0.5);
-                    padding: 20px;
-                    border-radius: 8px;
-                    color: #fff;
-                    max-width: 500px;
-                    backdrop-filter: blur(20px);
-                    box-shadow: 0 0 50px rgba(100, 150, 255, 0.3);
-                    z-index: 2000;
-                    font-family: Monaco, monospace;
-                `;
-
-                // Create content container
-                const contentDiv = document.createElement('div');
-                contentDiv.textContent = node.content;
-                contentDiv.style.marginBottom = '15px';
-                display.appendChild(contentDiv);
-
-                // Create button container
-                const buttonContainer = document.createElement('div');
-                buttonContainer.style.cssText = `
-                    display: flex;
-                    gap: 10px;
-                    justify-content: flex-end;
-                    margin-top: 15px;
-                `;
-
-                // Edit button
-                const editBtn = document.createElement('button');
-                editBtn.textContent = 'Edit';
-                editBtn.style.cssText = `
-                    background: rgba(100, 150, 255, 0.2);
-                    border: 1px solid rgba(100, 150, 255, 0.5);
-                    color: rgba(200, 220, 255, 0.9);
-                    padding: 5px 15px;
-                    border-radius: 4px;
-                    cursor: pointer;
-                    font-family: inherit;
-                    font-size: 12px;
-                `;
-                editBtn.onmouseover = () => editBtn.style.background = 'rgba(100, 150, 255, 0.3)';
-                editBtn.onmouseout = () => editBtn.style.background = 'rgba(100, 150, 255, 0.2)';
-                editBtn.onclick = () => {
-                    display.remove();
-                    this.editNode(node);
-                };
-
-                // Delete button
-                const deleteBtn = document.createElement('button');
-                deleteBtn.textContent = 'Delete';
-                deleteBtn.style.cssText = `
-                    background: rgba(255, 100, 100, 0.2);
-                    border: 1px solid rgba(255, 100, 100, 0.5);
-                    color: rgba(255, 200, 200, 0.9);
-                    padding: 5px 15px;
-                    border-radius: 4px;
-                    cursor: pointer;
-                    font-family: inherit;
-                    font-size: 12px;
-                `;
-                deleteBtn.onmouseover = () => deleteBtn.style.background = 'rgba(255, 100, 100, 0.3)';
-                deleteBtn.onmouseout = () => deleteBtn.style.background = 'rgba(255, 100, 100, 0.2)';
-                deleteBtn.onclick = () => {
-                    if (confirm('Delete this thought?')) {
-                        display.remove();
-                        this.deleteNode(node);
-                    }
-                };
-
-                // Close button
-                const closeBtn = document.createElement('button');
-                closeBtn.textContent = 'Close';
-                closeBtn.style.cssText = `
-                    background: rgba(150, 150, 150, 0.2);
-                    border: 1px solid rgba(150, 150, 150, 0.5);
-                    color: rgba(200, 200, 200, 0.9);
-                    padding: 5px 15px;
-                    border-radius: 4px;
-                    cursor: pointer;
-                    font-family: inherit;
-                    font-size: 12px;
-                `;
-                closeBtn.onmouseover = () => closeBtn.style.background = 'rgba(150, 150, 150, 0.3)';
-                closeBtn.onmouseout = () => closeBtn.style.background = 'rgba(150, 150, 150, 0.2)';
-                closeBtn.onclick = () => display.remove();
-
-                buttonContainer.appendChild(editBtn);
-                buttonContainer.appendChild(deleteBtn);
-                buttonContainer.appendChild(closeBtn);
-                display.appendChild(buttonContainer);
-
-                document.body.appendChild(display);
-
-                // Remove on Escape
-                const escapeHandler = (e) => {
-                    if (e.key === 'Escape') {
-                        display.remove();
-                        document.removeEventListener('keydown', escapeHandler);
-                    }
-                };
-                document.addEventListener('keydown', escapeHandler);
-            }
-
-            editNode(node) {
-                this.input.value = node.content;
-                this.inputContainer.classList.remove('hidden');
-                this.input.focus();
-                this.editingNode = node;
-
-                // Select all text for easy replacement
-                this.input.select();
-            }
-
-            deleteNode(node) {
-                const index = this.nodes.indexOf(node);
-                if (index > -1) {
-                    this.nodes.splice(index, 1);
-                    this.updateConnections();
-                    this.saveToLocalStorage();
-                    this.updateStatus();
-
-                    // Create a disappearing effect
-                    this.createPulse(node.x, node.y);
-                }
-            }
-
-            updatePhysics() {
-                // Update breathing phase
-                this.breathingPhase += this.settings.breathingSpeed;
-
-                // Update nodes
-                for (let node of this.nodes) {
-                    // Apply center gravity
-                    const centerDist = Math.hypot(node.x, node.y);
-                    if (centerDist > 0) {
-                        node.vx -= (node.x / centerDist) * this.settings.centerGravity;
-                        node.vy -= (node.y / centerDist) * this.settings.centerGravity;
-                    }
-
-                    // Apply connections
-                    for (let edge of this.edges) {
-                        let other = null;
-                        if (this.nodes[edge.from] === node) other = this.nodes[edge.to];
-                        if (this.nodes[edge.to] === node) other = this.nodes[edge.from];
-
-                        if (other) {
-                            const dx = other.x - node.x;
-                            const dy = other.y - node.y;
-                            const dist = Math.hypot(dx, dy);
-                            if (dist > 0) {
-                                const force = edge.strength * this.settings.connectionForce;
-                                node.vx += (dx / dist) * force;
-                                node.vy += (dy / dist) * force;
-                            }
+                // Text input handler
+                textInput.addEventListener('keypress', async (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        const text = textInput.value.trim();
+                        if (text) {
+                            await this.createNode(text);
+                            textInput.value = '';
                         }
                     }
-
-                    // Apply damping
-                    node.vx *= this.settings.damping;
-                    node.vy *= this.settings.damping;
-
-                    // Stop tiny movements
-                    if (Math.abs(node.vx) < this.settings.velocityThreshold) node.vx = 0;
-                    if (Math.abs(node.vy) < this.settings.velocityThreshold) node.vy = 0;
-
-                    // Update position
-                    node.x += node.vx;
-                    node.y += node.vy;
-
-                    // Update heat (cooling over time)
-                    node.heat *= 0.999;
-
-                    // Update pulse phase (much slower)
-                    node.pulsePhase += 0.005;
-                }
-
-                // Update particles
-                this.particles = this.particles.filter(p => {
-                    p.x += p.vx;
-                    p.y += p.vy;
-                    p.vx *= 0.98;
-                    p.vy *= 0.98;
-                    p.life *= 0.95;
-                    return p.life > 0.01;
                 });
 
-                // Smooth camera zoom (faster response)
-                this.camera.zoom += (this.camera.targetZoom - this.camera.zoom) * 0.25;
-            }
+                // Drag and drop handlers
+                dropZone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.add('dragover');
+                });
 
-            render() {
-                // Clear canvas
-                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
-                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                dropZone.addEventListener('dragleave', (e) => {
+                    dropZone.classList.remove('dragover');
+                });
 
-                // Draw background stars BEFORE camera transform (screen space)
-                this.ctx.save();
-                this.ctx.globalAlpha = 0.6;
-                for (let star of this.stars) {
-                    // Calculate star position in screen space with parallax
-                    const parallaxFactor = star.depth * 0.1;  // Slower movement for depth
-                    const screenX = star.x * this.canvas.width + (this.camera.x * parallaxFactor * this.camera.zoom);
-                    const screenY = star.y * this.canvas.height + (this.camera.y * parallaxFactor * this.camera.zoom);
+                dropZone.addEventListener('drop', async (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('dragover');
 
-                    // Wrap stars around screen edges for infinite starfield
-                    const wrappedX = ((screenX % this.canvas.width) + this.canvas.width) % this.canvas.width;
-                    const wrappedY = ((screenY % this.canvas.height) + this.canvas.height) % this.canvas.height;
-
-                    const twinkle = Math.sin(Date.now() * star.twinkleSpeed) * 0.3 + 0.7;  // Subtler twinkle
-
-                    this.ctx.fillStyle = `rgba(200, 220, 255, ${star.brightness * twinkle})`;
-                    this.ctx.beginPath();
-                    this.ctx.arc(wrappedX, wrappedY, star.size * star.depth, 0, Math.PI * 2);
-                    this.ctx.fill();
-                }
-                this.ctx.restore();
-
-                // Save context for world-space rendering
-                this.ctx.save();
-
-                // Apply camera transform for world objects
-                this.ctx.translate(this.canvas.width / 2, this.canvas.height / 2);
-                this.ctx.scale(this.camera.zoom, this.camera.zoom);
-                this.ctx.translate(this.camera.x, this.camera.y);
-
-                // Draw edges
-                this.ctx.globalAlpha = 0.6;
-                for (let edge of this.edges) {
-                    const from = this.nodes[edge.from];
-                    const to = this.nodes[edge.to];
-                    if (!from || !to) continue;
-
-                    const gradient = this.ctx.createLinearGradient(from.x, from.y, to.x, to.y);
-                    gradient.addColorStop(0, from.color);
-                    gradient.addColorStop(1, to.color);
-
-                    this.ctx.strokeStyle = gradient;
-                    this.ctx.lineWidth = edge.strength * 4 + 1;
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(from.x, from.y);
-                    this.ctx.lineTo(to.x, to.y);
-                    this.ctx.stroke();
-                }
-
-                // Draw particles
-                this.ctx.globalAlpha = 1;
-                for (let particle of this.particles) {
-                    this.ctx.fillStyle = particle.color.replace('0.8', particle.life);
-                    this.ctx.beginPath();
-                    this.ctx.arc(particle.x, particle.y, 2 * particle.life, 0, Math.PI * 2);
-                    this.ctx.fill();
-                }
-
-                // Draw nodes
-                for (let node of this.nodes) {
-                    // Check if node matches search
-                    let opacity = node.filtered ? 0.15 : 1.0;
-
-                    // Dim other nodes when one is expanded
-                    if (this.expandedNode && node !== this.expandedNode) {
-                        opacity *= 0.3;
-                    }
-
-                    // Node glow
-                    const pulse = Math.sin(node.pulsePhase) * 0.2 + 0.8;
-                    const breathing = Math.sin(this.breathingPhase) * 0.1 + 0.9;
-                    const heat = 0.5 + node.heat * 0.5;
-
-                    // Outer glow
-                    const glowSize = node.size * 3 * pulse * breathing;
-                    const glow = this.ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, glowSize);
-                    glow.addColorStop(0, node.color.replace('0.8', '0.3'));
-                    glow.addColorStop(1, node.color.replace('0.8', '0'));
-
-                    this.ctx.fillStyle = glow;
-                    this.ctx.globalAlpha = opacity * 0.5;
-                    this.ctx.beginPath();
-                    this.ctx.arc(node.x, node.y, glowSize, 0, Math.PI * 2);
-                    this.ctx.fill();
-
-                    // Main node
-                    this.ctx.fillStyle = node.color;
-                    this.ctx.globalAlpha = heat * opacity;
-                    this.ctx.beginPath();
-                    this.ctx.arc(node.x, node.y, node.size * breathing, 0, Math.PI * 2);
-                    this.ctx.fill();
-
-                    // Inner light
-                    this.ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-                    this.ctx.globalAlpha = opacity * 0.5;
-                    this.ctx.beginPath();
-                    this.ctx.arc(node.x - node.size * 0.3, node.y - node.size * 0.3, node.size * 0.3, 0, Math.PI * 2);
-                    this.ctx.fill();
-
-                    // Hover effect
-                    if (node === this.mouse.hoveredNode && !this.expandedNode) {
-                        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
-                        this.ctx.lineWidth = 2;
-                        this.ctx.beginPath();
-                        this.ctx.arc(node.x, node.y, node.size + 5, 0, Math.PI * 2);
-                        this.ctx.stroke();
-                    }
-                }
-
-                // Restore context
-                this.ctx.restore();
-
-                // Draw tooltip if visible (in screen space)
-                if (this.tooltip.visible && this.mouse.hoveredNode && !this.expandedNode) {
-                    this.drawTooltip();
-                }
-            }
-
-            drawExpandedNode(node) {
-                // Draw expanded content at the node's actual position
-                const screenPos = this.worldToScreen(node.x, node.y);
-                const expandedWidth = 320 * node.expandProgress;
-                const expandedHeight = 240 * node.expandProgress;
-
-                this.ctx.save();
-
-                // Draw expanded background
-                const gradient = this.ctx.createRadialGradient(
-                    screenPos.x, screenPos.y, 0,
-                    screenPos.x, screenPos.y, Math.max(expandedWidth, expandedHeight) / 2
-                );
-                gradient.addColorStop(0, 'rgba(30, 30, 60, 0.98)');
-                gradient.addColorStop(1, 'rgba(10, 10, 30, 0.95)');
-
-                this.ctx.fillStyle = gradient;
-                this.ctx.strokeStyle = node.color.replace('0.8', String(0.8 * node.expandProgress));
-                this.ctx.lineWidth = 2;
-                this.ctx.globalAlpha = node.expandProgress;
-
-                // Draw rounded rectangle
-                this.ctx.beginPath();
-                this.ctx.roundRect(
-                    screenPos.x - expandedWidth / 2,
-                    screenPos.y - expandedHeight / 2,
-                    expandedWidth,
-                    expandedHeight,
-                    8
-                );
-                this.ctx.fill();
-                this.ctx.stroke();
-
-                // Draw content if sufficiently expanded
-                if (node.expandProgress > 0.5) {
-                    const contentAlpha = (node.expandProgress - 0.5) * 2;
-                    this.ctx.globalAlpha = contentAlpha;
-
-                    // Title
-                    this.ctx.font = 'bold 16px Monaco, monospace';
-                    this.ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-                    this.ctx.fillText(
-                        node.title,
-                        screenPos.x - expandedWidth / 2 + 20,
-                        screenPos.y - expandedHeight / 2 + 30
-                    );
-
-                    // Type badge
-                    this.ctx.font = '10px Monaco, monospace';
-                    this.ctx.fillStyle = node.color;
-                    this.ctx.fillText(
-                        node.type.toUpperCase(),
-                        screenPos.x - expandedWidth / 2 + 20,
-                        screenPos.y - expandedHeight / 2 + 50
-                    );
-
-                    // Content (with text wrapping)
-                    this.ctx.font = '12px Monaco, monospace';
-                    this.ctx.fillStyle = 'rgba(200, 200, 220, 0.9)';
-                    this.wrapText(
-                        node.content,
-                        screenPos.x - expandedWidth / 2 + 20,
-                        screenPos.y - expandedHeight / 2 + 75,
-                        expandedWidth - 40,
-                        16
-                    );
-
-                    // Tags
-                    if (node.tags && node.tags.length > 0) {
-                        this.ctx.font = '10px Monaco, monospace';
-                        let tagX = screenPos.x - expandedWidth / 2 + 20;
-                        const tagY = screenPos.y + expandedHeight / 2 - 40;
-
-                        node.tags.forEach(tag => {
-                            this.ctx.fillStyle = 'rgba(100, 150, 255, 0.3)';
-                            const tagWidth = this.ctx.measureText('#' + tag).width + 8;
-                            this.ctx.fillRect(tagX, tagY - 12, tagWidth, 16);
-
-                            this.ctx.fillStyle = 'rgba(150, 200, 255, 0.9)';
-                            this.ctx.fillText('#' + tag, tagX + 4, tagY);
-                            tagX += tagWidth + 5;
-                        });
-                    }
-
-                    // Metadata preview
-                    if (node.metadata && Object.keys(node.metadata).length > 0) {
-                        this.ctx.font = '10px Monaco, monospace';
-                        this.ctx.fillStyle = 'rgba(150, 150, 170, 0.7)';
-                        const metaText = Object.entries(node.metadata)
-                            .slice(0, 2)
-                            .map(([k, v]) => `${k}: ${v}`)
-                            .join(' • ');
-                        this.ctx.fillText(
-                            metaText,
-                            screenPos.x - expandedWidth / 2 + 20,
-                            screenPos.y + expandedHeight / 2 - 20
-                        );
-                    }
-
-                    // Close button (X in top-right corner)
-                    const closeX = screenPos.x + expandedWidth / 2 - 30;
-                    const closeY = screenPos.y - expandedHeight / 2 + 30;
-                    const closeSize = 20;
-
-                    // Draw close button background
-                    this.ctx.fillStyle = 'rgba(255, 100, 100, 0.1)';
-                    this.ctx.beginPath();
-                    this.ctx.arc(closeX, closeY, closeSize / 2, 0, Math.PI * 2);
-                    this.ctx.fill();
-
-                    // Draw X
-                    this.ctx.strokeStyle = 'rgba(255, 150, 150, 0.8)';
-                    this.ctx.lineWidth = 2;
-                    this.ctx.beginPath();
-                    const offset = 5;
-                    this.ctx.moveTo(closeX - offset, closeY - offset);
-                    this.ctx.lineTo(closeX + offset, closeY + offset);
-                    this.ctx.moveTo(closeX - offset, closeY + offset);
-                    this.ctx.lineTo(closeX + offset, closeY - offset);
-                    this.ctx.stroke();
-
-                    // Add "Click to edit" hint at bottom
-                    this.ctx.font = '10px Monaco, monospace';
-                    this.ctx.fillStyle = 'rgba(150, 150, 170, 0.5)';
-                    this.ctx.fillText(
-                        'Double-click to edit',
-                        screenPos.x - expandedWidth / 2 + 20,
-                        screenPos.y + expandedHeight / 2 - 15
-                    );
-                }
-
-                this.ctx.restore();
-            }
-
-            wrapText(text, x, y, maxWidth, lineHeight) {
-                const words = text.split(' ');
-                let line = '';
-                let currentY = y;
-                const maxLines = 6;
-                let lineCount = 0;
-
-                for (let n = 0; n < words.length; n++) {
-                    const testLine = line + words[n] + ' ';
-                    const metrics = this.ctx.measureText(testLine);
-                    const testWidth = metrics.width;
-
-                    if (testWidth > maxWidth && n > 0) {
-                        this.ctx.fillText(line, x, currentY);
-                        line = words[n] + ' ';
-                        currentY += lineHeight;
-                        lineCount++;
-
-                        if (lineCount >= maxLines) {
-                            this.ctx.fillText('...', x, currentY);
-                            break;
+                    const files = e.dataTransfer.files;
+                    for (let file of files) {
+                        if (file.type.startsWith('text/')) {
+                            const text = await file.text();
+                            await this.createNode(text.substring(0, 500)); // Limit text length
                         }
-                    } else {
-                        line = testLine;
                     }
-                }
+                });
 
-                if (lineCount < maxLines) {
-                    this.ctx.fillText(line, x, currentY);
-                }
-            }
+                // Paste handler
+                document.addEventListener('paste', async (e) => {
+                    if (document.activeElement !== textInput) {
+                        const text = e.clipboardData.getData('text');
+                        if (text) {
+                            await this.createNode(text.substring(0, 500));
+                        }
+                    }
+                });
 
-            drawTooltip() {
-                const padding = 8;
-                const fontSize = 12;
-                this.ctx.font = `${fontSize}px Monaco, monospace`;
-                const textWidth = this.ctx.measureText(this.tooltip.text).width;
-                const boxWidth = textWidth + padding * 2;
-                const boxHeight = fontSize + padding * 2;
+                // Detect if mobile
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-                // Adjust position to keep tooltip on screen
-                let x = this.tooltip.x;
-                let y = this.tooltip.y;
+                // Mouse/touch move for hover detection
+                const handlePointerMove = (e) => {
+                    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+                    const clientY = e.clientY || (e.touches && e.touches[0].clientY);
 
-                if (x + boxWidth > this.canvas.width) {
-                    x = this.canvas.width - boxWidth - 10;
-                }
-                if (x < 10) x = 10;
-                if (y < 10) y = this.tooltip.y + 40; // Move below cursor if too high
+                    if (!clientX || !clientY) return;
+                    this.mouse.x = (clientX / window.innerWidth) * 2 - 1;
+                    this.mouse.y = -(clientY / window.innerHeight) * 2 + 1;
 
-                // Draw tooltip background
-                this.ctx.fillStyle = 'rgba(20, 20, 40, 0.95)';
-                this.ctx.strokeStyle = 'rgba(100, 150, 255, 0.5)';
-                this.ctx.lineWidth = 1;
-                this.ctx.beginPath();
-                this.ctx.roundRect(x, y, boxWidth, boxHeight, 4);
-                this.ctx.fill();
-                this.ctx.stroke();
-
-                // Draw tooltip text
-                this.ctx.fillStyle = 'rgba(220, 220, 255, 0.95)';
-                this.ctx.fillText(this.tooltip.text, x + padding, y + padding + fontSize * 0.75);
-            }
-
-            updateStatus() {
-                document.getElementById('node-count').textContent = `${this.nodes.length} thoughts`;
-
-                const now = new Date();
-                const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                document.getElementById('time').textContent = timeStr;
-            }
-
-            saveToLocalStorage() {
-                const data = {
-                    nodes: this.nodes.map(n => ({
-                        content: n.content,
-                        x: n.x,
-                        y: n.y,
-                        color: n.color,
-                        created: n.created
-                    }))
+                    // Update tooltip position (hide on mobile)
+                    if (this.hoveredNode && !isMobile) {
+                        tooltip.style.left = clientX + 15 + 'px';
+                        tooltip.style.top = clientY - 30 + 'px';
+                    }
                 };
-                localStorage.setItem('galaxy-brain-data', JSON.stringify(data));
-            }
 
-            loadFromLocalStorage() {
-                const stored = localStorage.getItem('galaxy-brain-data');
-                if (stored) {
-                    try {
-                        const data = JSON.parse(stored);
-                        this.nodes = [];
-                        data.nodes.forEach(n => this.addNode(n));
-                    } catch (e) {
-                        console.error('Failed to load saved data:', e);
+                document.addEventListener('mousemove', handlePointerMove);
+                document.addEventListener('touchmove', handlePointerMove);
+
+                // Click/tap handler for nodes
+                const handlePointerClick = (e) => {
+                    if (this.hoveredNode && !e.target.closest('#drop-zone') && !e.target.closest('.add-button')) {
+                        // Check if it's the home planet
+                        if (this.hoveredNode.userData.isHome && this.hoveredNode.userData.link) {
+                            window.open(this.hoveredNode.userData.link, '_blank');
+                            return;
+                        }
+
+                        // On mobile, show alert with text preview
+                        if (isMobile) {
+                            alert(this.hoveredNode.userData.preview);
+                        } else {
+                            console.log('Full text:', this.hoveredNode.userData.text);
+                        }
                     }
-                }
-            }
+                };
 
-            filterNodes() {
-                if (!this.searchTerm) {
-                    this.nodes.forEach(node => node.filtered = false);
-                } else {
-                    this.nodes.forEach(node => {
-                        node.filtered = !node.content.toLowerCase().includes(this.searchTerm);
-                    });
-                }
+                document.addEventListener('click', handlePointerClick);
+                document.addEventListener('touchend', handlePointerClick);
+
+                // Add button click
+                addButton.addEventListener('click', () => {
+                    dropZone.classList.add('active');
+                    textInput.value = '';
+                    textInput.focus();
+                });
+
+                // Escape to close input
+                document.addEventListener('keydown', (e) => {
+                    if (e.code === 'Escape') {
+                        dropZone.classList.remove('active');
+                        textInput.blur();
+                    }
+                });
+
+                // Mouse down/up for grab cursor
+                this.renderer.domElement.addEventListener('mousedown', () => {
+                    if (!this.hoveredNode) {
+                        container.classList.add('grabbing');
+                    }
+                });
+
+                document.addEventListener('mouseup', () => {
+                    container.classList.remove('grabbing');
+                });
             }
 
             animate() {
-                this.updatePhysics();
-                this.render();
                 requestAnimationFrame(() => this.animate());
+
+                // Update controls
+                this.controls.update();
+
+                const time = Date.now() * 0.001;
+
+                // Animate individual star twinkling
+                if (this.stars && this.starData) {
+                    const sizes = this.stars.geometry.attributes.size.array;
+                    const colors = this.stars.geometry.attributes.color.array;
+
+                    for (let i = 0; i < this.starData.length; i++) {
+                        const star = this.starData[i];
+
+                        // Each star has its own twinkle cycle
+                        const wave = Math.sin(time * star.twinkleSpeed + star.twinklePhase + star.twinkleOffset);
+                        // Sharp pulse effect - mostly dim, briefly bright
+                        const twinkle = Math.pow(Math.max(0, wave), 4); // Even sharper with power of 4
+
+                        // Update size - dramatic change when twinkling
+                        sizes[i] = star.baseSize * (1 + twinkle * 3); // Up to 4x size when twinkling
+
+                        // Update brightness through color
+                        const brightness = star.baseOpacity + twinkle * (1 - star.baseOpacity);
+                        const colorIndex = i * 3;
+                        colors[colorIndex] = this.originalColors[colorIndex] * brightness;
+                        colors[colorIndex + 1] = this.originalColors[colorIndex + 1] * brightness;
+                        colors[colorIndex + 2] = this.originalColors[colorIndex + 2] * brightness;
+                    }
+
+                    this.stars.geometry.attributes.size.needsUpdate = true;
+                    this.stars.geometry.attributes.color.needsUpdate = true;
+                }
+
+                // Animate mountain planet
+                if (this.mountainPlanet) {
+                    // Gentle rotation
+                    this.mountainPlanet.group.rotation.y += this.mountainPlanet.rotationSpeed;
+
+                    // Subtle floating motion
+                    this.mountainPlanet.group.position.y = Math.sin(time * 0.3) * 0.5;
+                }
+
+                // Gentle drift for all nodes
+                this.nodes.forEach(node => {
+                    // Skip the home planet
+                    if (node.userData.isHome) return;
+
+                    // Sinusoidal drift
+                    node.position.x += Math.sin(time + node.userData.id) * 0.01;
+                    node.position.y += Math.cos(time * 0.7 + node.userData.id) * 0.01;
+                    node.position.z += Math.sin(time * 0.5 + node.userData.id) * 0.01;
+
+                    // Small rotation
+                    node.rotation.y += 0.002;
+                });
+
+                // Check for hover
+                this.raycaster.setFromCamera(this.mouse, this.camera);
+                const intersects = this.raycaster.intersectObjects(this.nodes);
+                const container = document.getElementById('canvas-container');
+                const tooltip = document.getElementById('node-tooltip');
+
+                if (intersects.length > 0) {
+                    const hoveredNode = intersects[0].object;
+
+                    // Update cursor
+                    container.classList.add('pointer');
+                    container.classList.remove('grab');
+
+                    if (this.hoveredNode !== hoveredNode) {
+                        // Reset previous hover
+                        if (this.hoveredNode) {
+                            this.hoveredNode.material.emissiveIntensity = 0.2;
+                            this.hoveredNode.scale.set(1, 1, 1);
+                        }
+
+                        this.hoveredNode = hoveredNode;
+
+                        // Highlight hovered node
+                        if (hoveredNode.userData.isHome) {
+                            // Special highlight for mountain planet
+                            hoveredNode.material.emissiveIntensity = 0.6;
+                            this.mountainPlanet.group.scale.set(1.05, 1.05, 1.05);
+                        } else {
+                            hoveredNode.material.emissiveIntensity = 0.5;
+                            hoveredNode.scale.set(1.1, 1.1, 1.1);
+                        }
+
+                        // Show tooltip
+                        tooltip.textContent = hoveredNode.userData.preview;
+                        tooltip.classList.add('visible');
+                    }
+                } else {
+                    // Reset cursor
+                    container.classList.remove('pointer');
+
+                    if (this.hoveredNode) {
+                        // Reset previous hover
+                        if (this.hoveredNode.userData.isHome) {
+                            this.hoveredNode.material.emissiveIntensity = 0.3;
+                            this.mountainPlanet.group.scale.set(1, 1, 1);
+                        } else {
+                            this.hoveredNode.material.emissiveIntensity = 0.2;
+                            this.hoveredNode.scale.set(1, 1, 1);
+                        }
+                        this.hoveredNode = null;
+
+                        // Hide tooltip
+                        tooltip.classList.remove('visible');
+                    }
+                }
+
+                // Render
+                this.renderer.render(this.scene, this.camera);
             }
         }
 
-        // Initialize the galaxy when page loads
-        window.addEventListener('DOMContentLoaded', () => {
-            const galaxy = new GalaxyBrain();
+        // Initialize the application
+        const thoughtSpace = new ThoughtSpace();
 
-            // Update time display
-            setInterval(() => galaxy.updateStatus(), 1000);
-        });
+        // Show input on first load if no nodes
+        document.getElementById('drop-zone').classList.add('active');
+        document.getElementById('text-input').focus();
     </script>
 </body>
 </html>
