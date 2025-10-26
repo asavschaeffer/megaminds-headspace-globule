@@ -1,0 +1,798 @@
+/* ========================================
+   SOL EREMUS - COMPOSITIONAL ZONE SYSTEM
+   ========================================
+
+   PHOTOSHOP → CSS WORKFLOW:
+
+   1. Open your image in Photoshop/Figma/GIMP
+   2. Use selection tools to identify compositional boundaries
+   3. Note the coordinates as percentages of image dimensions
+   4. Update the zone positioning below
+
+   Example: If sky region ends at 45% from top:
+   .zone-sky { height: 45%; }
+
+   For complex shapes, use clip-path:
+   clip-path: polygon(x1 y1, x2 y2, x3 y3, ...);
+
+   Pro tip: Use https://bennettfeely.com/clippy/ for visual clip-path editing
+
+======================================== */
+
+
+/* ========================================
+   ZONE BOUNDARIES - EDIT THESE!
+   ======================================== */
+
+/* Scene 1: Peak - All zones use GIMP-traced SVG paths */
+#scene-peak .zone-sky,
+#scene-peak .zone-fog,
+#scene-peak .zone-peak {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* SVG paths define the boundaries - no CSS positioning needed! */
+}
+
+/* Scene 2: Mid-Mountain */
+#scene-mid-mountain .zone-fog-top {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 15%;
+}
+
+#scene-mid-mountain .zone-forest {
+  top: 15%;
+  left: 0;
+  width: 100%;
+  height: 70%;
+}
+
+#scene-mid-mountain .zone-valley {
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 15%;
+}
+
+/* Scene 3: Cave */
+#scene-cave .zone-cave-left {
+  top: 0;
+  left: 0;
+  width: 45%;
+  height: 100%;
+  clip-path: polygon(0 0, 100% 0, 85% 100%, 0 100%); /* Angled edge */
+}
+
+#scene-cave .zone-waterfall {
+  top: 20%;
+  left: 35%;
+  width: 30%;
+  height: 60%;
+}
+
+#scene-cave .zone-path {
+  top: 0;
+  right: 0;
+  width: 45%;
+  height: 100%;
+  clip-path: polygon(15% 0, 100% 0, 100% 100%, 0 100%); /* Angled edge */
+}
+
+/* Scene 4: Cliff Edge */
+#scene-cliff-edge .zone-storm {
+  top: 0;
+  right: 0;
+  width: 60%;
+  height: 60%;
+  clip-path: ellipse(80% 70% at 70% 30%); /* Elliptical storm region */
+}
+
+#scene-cliff-edge .zone-pit {
+  top: 35%;
+  left: 30%;
+  width: 40%;
+  height: 40%;
+  clip-path: circle(45% at 50% 50%); /* Circular pit */
+}
+
+#scene-cliff-edge .zone-ground {
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 35%;
+}
+
+/* Scene 5: Purgatorio */
+#scene-purgatorio .zone-clouds {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 35%;
+}
+
+#scene-purgatorio .zone-mountain-island {
+  top: 25%;
+  left: 15%;
+  width: 70%;
+  height: 45%;
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%); /* Mountain shape */
+}
+
+#scene-purgatorio .zone-sea {
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 30%;
+}
+
+
+/* ========================================
+   BASE STYLES
+   ======================================== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #000;
+  font-family: Georgia, serif;
+  overflow: hidden;
+  color: #fff;
+}
+
+/* Soft scroll-snap for smooth feel */
+.scroll-container {
+  width: 100%;
+  height: 100vh;
+  overflow-y: scroll;
+  scroll-snap-type: y proximity; /* Soft snap, not mandatory */
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+}
+
+.scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+/* Scene container */
+.scene {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  scroll-snap-align: start;
+}
+
+/* Scene image */
+.scene-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: filter 0.6s ease;
+}
+
+/* Gentle image enhance on hover */
+.scene:has(.zone:hover) .scene-image {
+  filter: brightness(1.05) contrast(1.1) saturate(1.05);
+}
+
+
+/* ========================================
+   ZONE BASE STYLES
+   ======================================== */
+
+.zones {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.zone {
+  position: absolute;
+  pointer-events: all;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Keyboard accessibility: visible focus ring and boundary outline */
+.zone:focus-visible {
+  outline: 2px dashed rgba(255, 255, 255, 0.7);
+  outline-offset: 2px;
+}
+
+.zone:focus-visible .zone-svg path {
+  stroke: rgba(255, 255, 255, 0.8);
+  stroke-width: 2;
+}
+
+/* If zone has SVG, make only the SVG clickable */
+.zone:has(.zone-svg) {
+  pointer-events: none;
+}
+
+.zone:has(.zone-svg) .zone-effect,
+.zone:has(.zone-svg) .zone-label {
+  pointer-events: none; /* Effects don't block clicks */
+}
+
+/* Zone effects container */
+.zone-effect {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+
+.zone:hover .zone-effect {
+  opacity: 1;
+}
+
+
+/* SVG Zone Boundaries (from image editor tracings) */
+.zone-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* Only the path is clickable */
+}
+
+.zone-svg path {
+  fill: transparent; /* Invisible but clickable */
+  pointer-events: all; /* THIS defines the clickable area */
+  cursor: pointer;
+  transition: fill 0.3s ease;
+  stroke: transparent;
+  stroke-width: 2;
+}
+
+/* Debug Mode - Show all zone boundaries with color coding */
+body.debug-zones .zone {
+  outline: 2px dashed rgba(255, 255, 255, 0.4) !important;
+}
+
+body.debug-zones .zone-svg path {
+  fill: rgba(255, 255, 255, 0.15) !important;
+  stroke: rgba(255, 255, 255, 0.6) !important;
+  stroke-width: 2 !important;
+}
+
+/* Color-code zones by type */
+body.debug-zones .zone-sky,
+body.debug-zones .zone-fog-top,
+body.debug-zones .zone-clouds {
+  background: rgba(0, 191, 255, 0.1) !important;
+}
+
+body.debug-zones .zone-sky .zone-svg path {
+  fill: rgba(0, 191, 255, 0.2) !important;
+  stroke: rgba(0, 191, 255, 0.8) !important;
+}
+
+body.debug-zones .zone-peak,
+body.debug-zones .zone-forest,
+body.debug-zones .zone-mountain-island {
+  background: rgba(34, 139, 34, 0.1) !important;
+}
+
+body.debug-zones .zone-peak .zone-svg path {
+  fill: rgba(34, 139, 34, 0.2) !important;
+  stroke: rgba(34, 139, 34, 0.8) !important;
+}
+
+body.debug-zones .zone-fog,
+body.debug-zones .zone-valley,
+body.debug-zones .zone-fog-bottom {
+  background: rgba(211, 211, 211, 0.1) !important;
+}
+
+body.debug-zones .zone-fog .zone-svg path {
+  fill: rgba(211, 211, 211, 0.2) !important;
+  stroke: rgba(211, 211, 211, 0.8) !important;
+}
+
+/* Show zone labels in debug mode */
+body.debug-zones .zone-label {
+  color: rgba(255, 255, 255, 0.9) !important;
+  transform: translateX(-50%) translateY(0) !important;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 4px 12px;
+  border-radius: 4px;
+}
+
+body.debug-zones .zone-label-sky {
+  background: rgba(0, 0, 0, 0.5); /* Lighter for sky */
+  font-size: 20px; /* Keep larger size in debug */
+}
+
+
+/* ========================================
+   ZONE LABELS
+   ======================================== */
+
+.zone-label {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  color: rgba(255, 255, 255, 0);
+  font-size: clamp(12px, 1.8vw, 18px);
+  font-weight: 300;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-shadow: 0 0 20px rgba(0, 0, 0, 0.9);
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  pointer-events: none;
+  font-family: Georgia, serif;
+}
+
+/* Sky zone label - HEADSPACE (embedded in scene) */
+.zone-label-sky {
+  top: 25%; /* Centered in upper sky region */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: clamp(18px, 3.2vw, 36px);
+  font-weight: 100;
+  letter-spacing: 12px;
+
+  /* BLEND MODE EXPERIMENTS - try each one:
+     - overlay: Combines multiply/screen (dramatic, embedded)
+     - soft-light: Gentle embedding (subtle)
+     - hard-light: Strong contrast (punchy)
+     - screen: Lightens background (glowing)
+     - multiply: Darkens (atmospheric)
+     - lighten: Only shows where lighter than bg
+     - difference: Inverts colors (trippy)
+  */
+  mix-blend-mode: overlay;
+
+  opacity: 0.6; /* Subtle, embedded feel */
+  color: rgba(255, 255, 255, 0.4); /* Start more transparent */
+  text-shadow:
+    0 0 40px rgba(255, 255, 255, 0.6),
+    0 0 80px rgba(173, 216, 230, 0.4),
+    0 0 120px rgba(135, 206, 250, 0.2);
+}
+
+/* Fallback when mix-blend-mode is unsupported */
+@supports not (mix-blend-mode: overlay) {
+  .zone-label-sky {
+    mix-blend-mode: normal;
+    opacity: 0.9;
+    color: #ffffff;
+    text-shadow:
+      0 0 8px rgba(0, 0, 0, 0.6),
+      0 0 24px rgba(0, 0, 0, 0.8);
+  }
+}
+
+.zone-sky:hover .zone-label-sky,
+.zone:has(.zone-svg path:hover) .zone-label-sky {
+  color: rgba(255, 255, 255, 0.9);
+  opacity: 1;
+  text-shadow:
+    0 0 60px rgba(255, 255, 255, 0.8),
+    0 0 120px rgba(173, 216, 230, 0.6);
+}
+
+/* Peak zone label - centered in mountain (STANDS OUT) */
+.zone-peak .zone-label {
+  top: 50%; /* Centered in peak area */
+  bottom: auto;
+  color: rgba(255, 255, 255, 0); /* Start invisible */
+  font-weight: 400; /* Slightly bolder than sky */
+  text-shadow:
+    0 3px 10px rgba(0, 0, 0, 1),
+    0 6px 20px rgba(0, 0, 0, 0.8),
+    0 0 30px rgba(0, 0, 0, 0.6);
+}
+
+.zone-peak:hover .zone-label,
+.zone-peak:has(.zone-svg path:hover) .zone-label {
+  color: rgba(255, 255, 255, 1); /* Full bright on hover */
+  text-shadow:
+    0 3px 12px rgba(0, 0, 0, 1),
+    0 6px 24px rgba(0, 0, 0, 0.9),
+    0 0 50px rgba(255, 255, 255, 0.5); /* White glow */
+}
+
+/* Fog zone label - centered in lower clouds (STANDS OUT) */
+.zone-fog .zone-label {
+  bottom: 30%; /* Centered in fog/cloud area */
+  color: rgba(255, 255, 255, 0); /* Start invisible */
+  font-weight: 400; /* Slightly bolder than sky */
+  text-shadow:
+    0 3px 10px rgba(0, 0, 0, 1),
+    0 6px 20px rgba(0, 0, 0, 0.8),
+    0 0 30px rgba(0, 0, 0, 0.6);
+}
+
+.zone-fog:hover .zone-label,
+.zone-fog:has(.zone-svg path:hover) .zone-label {
+  color: rgba(255, 255, 255, 1); /* Full bright on hover */
+  text-shadow:
+    0 3px 12px rgba(0, 0, 0, 1),
+    0 6px 24px rgba(0, 0, 0, 0.9),
+    0 0 50px rgba(211, 211, 211, 0.5); /* Soft white glow */
+}
+
+/* Show effect when hovering SVG path */
+.zone:has(.zone-svg path:hover) .zone-effect {
+  opacity: 1;
+}
+
+
+/* ========================================
+   VISUAL EFFECTS (PORTED FROM ENHANCED)
+   ======================================== */
+
+/* Stars Effect */
+.effect-stars {
+  width: 100%;
+  height: 100%;
+  background-image:
+    radial-gradient(2px 2px at 20% 30%, white, transparent),
+    radial-gradient(2px 2px at 60% 70%, white, transparent),
+    radial-gradient(1px 1px at 50% 50%, white, transparent),
+    radial-gradient(2px 2px at 80% 10%, white, transparent);
+  background-size: 300% 300%;
+  background-position: 0% 0%;
+  animation: starTwinkle 15s ease-in-out infinite;
+  opacity: 0.6;
+}
+
+@keyframes starTwinkle {
+  0%, 100% { background-position: 0% 0%; }
+  50% { background-position: 100% 100%; }
+}
+
+/* Glow Effect */
+.effect-glow {
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 255, 255, 0.3) 0%,
+    rgba(255, 255, 255, 0.1) 30%,
+    transparent 70%
+  );
+  filter: blur(20px);
+  transform: scale(0.8);
+  transition: transform 0.6s ease;
+}
+
+.zone-peak:hover .effect-glow {
+  transform: scale(1.2);
+}
+
+/* Fog Effect */
+.effect-fog,
+.effect-mist {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  transform: translateY(100%);
+  transition: transform 1s ease;
+}
+
+.zone:hover .effect-fog,
+.zone:hover .effect-mist {
+  transform: translateY(0);
+}
+
+.effect-fog-reverse {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    0deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  transform: translateY(-100%);
+  transition: transform 1s ease;
+}
+
+.zone:hover .effect-fog-reverse {
+  transform: translateY(0);
+}
+
+/* Forest Effect */
+.effect-forest {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(34, 139, 34, 0.1) 25%,
+    transparent 50%,
+    rgba(34, 139, 34, 0.1) 75%,
+    transparent 100%
+  );
+  animation: sway 4s ease-in-out infinite paused;
+}
+
+.zone:hover .effect-forest {
+  animation-play-state: running;
+}
+
+@keyframes sway {
+  0%, 100% { transform: skewX(0deg); }
+  25% { transform: skewX(1deg); }
+  75% { transform: skewX(-1deg); }
+}
+
+/* Torch Effect */
+.effect-torch {
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(255, 140, 0, 0.3) 0%,
+    rgba(255, 69, 0, 0.1) 40%,
+    transparent 70%
+  );
+  animation: flicker 2s ease-in-out infinite;
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+  25%, 75% { opacity: 0.6; }
+}
+
+/* Water Effect */
+.effect-water {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(173, 216, 230, 0.2) 50%,
+    transparent 70%
+  );
+  background-size: 200% 200%;
+  animation: shimmer 3s linear infinite paused;
+}
+
+.zone:hover .effect-water {
+  animation-play-state: running;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 200%; }
+  100% { background-position: -200% -200%; }
+}
+
+/* Shadow Effect */
+.effect-shadow {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0, 0, 0, 0.2) 100%
+  );
+}
+
+/* Lightning Effect (GORGEOUS from enhanced!) */
+.effect-lightning {
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    ellipse at top right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0) 99%,
+    rgba(255, 255, 255, 0.8) 100%
+  );
+  opacity: 0;
+  animation: lightning 4s ease-in-out infinite;
+}
+
+.zone:hover .effect-lightning {
+  animation-duration: 2s;
+}
+
+@keyframes lightning {
+  0%, 90%, 100% { opacity: 0; }
+  91%, 93%, 95% { opacity: 1; }
+  92%, 94% { opacity: 0; }
+}
+
+/* Abyss Swirl Effect (GORGEOUS from enhanced!) */
+.effect-abyss-swirl {
+  width: 100%;
+  height: 100%;
+  background: conic-gradient(
+    from 0deg at 50% 50%,
+    transparent 0deg,
+    rgba(75, 0, 130, 0.2) 90deg,
+    transparent 180deg,
+    rgba(75, 0, 130, 0.2) 270deg,
+    transparent 360deg
+  );
+  animation: swirl 10s linear infinite paused;
+}
+
+.zone:hover .effect-abyss-swirl {
+  animation-play-state: running;
+}
+
+@keyframes swirl {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Ground Effect */
+.effect-ground {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to top,
+    rgba(101, 67, 33, 0.1) 0%,
+    transparent 50%
+  );
+}
+
+/* Clouds Effect */
+.effect-clouds {
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    ellipse at 30% 40%,
+    rgba(255, 255, 255, 0.1) 0%,
+    transparent 40%
+  );
+  animation: cloudFloat 15s ease-in-out infinite;
+}
+
+@keyframes cloudFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+/* Ice Glimmer Effect (GORGEOUS from enhanced!) */
+.effect-ice-glimmer {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 60%
+  );
+  background-size: 400% 400%;
+  animation: glimmer 5s ease-in-out infinite paused;
+}
+
+.zone:hover .effect-ice-glimmer {
+  animation-play-state: running;
+}
+
+@keyframes glimmer {
+  0%, 100% { background-position: 0% 0%; }
+  50% { background-position: 100% 100%; }
+}
+
+/* Waves Effect */
+.effect-waves {
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0px,
+    rgba(0, 119, 190, 0.1) 50px,
+    transparent 100px
+  );
+  animation: waves 8s linear infinite paused;
+}
+
+.zone:hover .effect-waves {
+  animation-play-state: running;
+}
+
+@keyframes waves {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(100px); }
+}
+
+
+/* ========================================
+   ACCESSIBILITY / UTILITIES / PANELS
+   ======================================== */
+
+/* Screen-reader only text helper */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Blend tester panel (toggle with key: B) */
+.blend-panel {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 8px 10px;
+  border-radius: 6px;
+  color: #ddd;
+  font: 12px/1.2 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  backdrop-filter: blur(4px);
+  display: none;
+}
+
+.blend-panel label,
+.blend-panel select,
+.blend-panel button {
+  font-size: 12px;
+}
+
+.blend-panel select {
+  background: rgba(255, 255, 255, 0.06);
+  color: #eee;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  padding: 4px 6px;
+  margin-left: 6px;
+}
+
+.blend-panel button {
+  margin-left: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #eee;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+body.show-blend-panel .blend-panel {
+  display: block;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 768px) {
+  .zone-label {
+    font-size: 14px;
+    bottom: 10%;
+  }
+}

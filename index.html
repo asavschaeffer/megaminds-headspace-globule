@@ -4,155 +4,267 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sol Eremus</title>
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles-fresh.css" />
   </head>
   <body>
     <main class="scroll-container">
       <!-- Scene 1: Peak -->
-      <div id="scene-peak" class="scene-container">
+      <section id="scene-peak" class="scene">
         <img
-          data-src="images/sky-mountain-fog.webp"
-          class="visual-layer"
-          alt="A sharp mountain peak rising through fog to a galaxy-filled sky." />
-        <svg
-          class="interaction-map"
-          viewBox="0 0 1920 2560"
-          preserveAspectRatio="xMidYMid slice">
-          <a href="headspace.html">
-            <path
-              d="M 0 0 L 1920 0 L 1920 1270 Q 960 1150 0 1270 Z"
-              fill="#0d1a26"></path>
+          src="images/sky-mountain-fog.webp"
+          class="scene-image"
+          alt="Mountain peak through fog to stars" />
+
+        <div class="zones">
+          <!-- Order matters: sky → fog → peak (peak on top) -->
+          <a href="headspace.html" class="zone zone-sky" data-zone-name="sky">
+            <!-- GIMP hand-traced: stars-mountain-peak_sky -->
+            <svg
+              viewBox="0 0 1536 1024"
+              preserveAspectRatio="none"
+              class="zone-svg">
+              <path
+                d="M 1.00,474.00
+              C 1.00,474.00 378.00,416.00 847.00,426.00
+                1316.00,436.00 1535.00,490.00 1533.00,490.00
+                1531.00,490.00 1541.00,-8.00 1541.00,-8.00
+                1541.00,-8.00 -9.00,-6.00 -8.00,-6.00" />
+            </svg>
+            <div class="zone-effect">
+              <div class="effect-stars"></div>
+            </div>
+            <span class="zone-label zone-label-sky">HEADSPACE</span>
           </a>
-          <a href="#scene-mid-mountain">
-            <path
-              d="M 0 2560 L 1920 2560 L 1920 1270 Q 960 1150 0 1270 Z"
-              fill="#b0c4de"></path>
+
+          <a
+            href="#scene-mid-mountain"
+            class="zone zone-fog"
+            data-zone-name="fog">
+            <!-- GIMP hand-traced: stars-mountain-peak_cloud -->
+            <svg
+              viewBox="0 0 1536 1024"
+              preserveAspectRatio="none"
+              class="zone-svg">
+              <path
+                d="M 1091.00,1020.00
+              C 1091.00,1020.00 1128.00,953.00 1128.00,953.00
+                1128.00,953.00 1169.00,595.00 1169.00,595.00
+                1169.00,595.00 1102.00,549.00 1102.00,549.00
+                1102.00,549.00 996.00,542.00 996.00,542.00
+                996.00,542.00 870.00,422.00 870.00,422.00
+                870.00,422.00 532.00,635.00 532.00,635.00
+                532.00,635.00 427.00,654.00 427.00,655.00
+                427.00,656.00 266.00,610.00 266.00,610.00
+                266.00,610.00 237.00,625.00 237.00,627.00
+                237.00,629.00 136.00,639.00 136.00,639.00
+                136.00,639.00 2.00,757.00 2.00,757.00
+                2.00,757.00 0.00,479.00 0.00,479.00
+                0.00,479.00 840.00,348.00 1533.00,494.00
+                1557.51,695.12 1527.00,974.00 1534.00,1019.00
+                1534.00,1019.00 1535.00,1026.00 1535.00,1017.00M 1387.00,1042.00" />
+            </svg>
+            <div class="zone-effect">
+              <div class="effect-fog"></div>
+            </div>
+            <span class="zone-label">Descend Through Clouds</span>
           </a>
-          <a href="peak.html">
-            <path d="M 960 1120 L 660 1570 L 1260 1570 Z" fill="#4d4d4d"></path>
+
+          <a href="peak.html" class="zone zone-peak" data-zone-name="mountain">
+            <!-- GIMP-traced SVG boundary - maps perfectly to scene dimensions -->
+            <svg
+              viewBox="0 0 1536 1024"
+              preserveAspectRatio="none"
+              class="zone-svg">
+              <path
+                d="M 872.00,424.00
+              C 872.00,424.00 996.00,545.00 997.00,545.00
+                998.00,545.00 1100.00,554.00 1100.00,554.00
+                1100.00,554.00 1167.00,594.00 1167.00,594.00
+                1167.00,594.00 1157.00,741.00 1157.00,741.00
+                1157.00,741.00 1124.00,959.00 1124.00,959.00
+                1124.00,959.00 1086.00,1028.00 1086.00,1028.00
+                1086.00,1028.00 -3.00,1022.00 -3.00,1022.00
+                -3.00,1022.00 -2.00,763.00 -2.00,763.00
+                -2.00,763.00 137.00,641.00 137.00,641.00
+                137.00,641.00 230.00,633.00 230.00,633.00
+                230.00,633.00 267.00,612.00 269.00,612.00
+                271.00,612.00 393.00,655.00 425.00,656.00
+                457.00,657.00 531.00,640.00 531.00,640.00
+                531.00,640.00 607.00,578.00 607.00,578.00
+                607.00,578.00 689.00,530.00 689.00,530.00
+                689.00,530.00 769.00,481.00 769.00,481.00
+                769.00,481.00 827.00,451.00 827.00,451.00" />
+            </svg>
+            <div class="zone-effect">
+              <div class="effect-glow"></div>
+            </div>
+            <span class="zone-label">Ascend the Summit</span>
           </a>
-        </svg>
-      </div>
+        </div>
+      </section>
 
       <!-- Scene 2: Mid-Mountain -->
-      <div id="scene-mid-mountain" class="scene-container">
+      <section id="scene-mid-mountain" class="scene">
         <img
-          data-src="images/fog-shrouded-mountain-green-slopes.jpeg"
-          class="visual-layer"
-          alt="Foggy green mountain slopes." />
-        <svg
-          class="interaction-map"
-          viewBox="0 0 1920 1080"
-          preserveAspectRatio="xMidYMid slice">
-          <!-- Top fog area (back to peak) -->
-          <a href="#scene-peak">
-            <rect x="0" y="0" width="1920" height="162" fill="#b0c4de"/>
+          src="images/fog-shrouded-mountain-green-slopes.jpeg"
+          class="scene-image"
+          alt="Foggy green mountain slopes" />
+
+        <div class="zones">
+          <a href="#scene-peak" class="zone zone-fog-top" data-zone-name="fog">
+            <div class="zone-effect">
+              <div class="effect-fog-reverse"></div>
+            </div>
+            <span class="zone-label">Return Above</span>
           </a>
-          <!-- Middle cliffs area -->
-          <a href="#cliffs-link">
-            <rect x="0" y="162" width="1920" height="756" fill="#4d4d4d"/>
+
+          <a href="#forest" class="zone zone-forest" data-zone-name="forest">
+            <div class="zone-effect">
+              <div class="effect-forest"></div>
+            </div>
+            <span class="zone-label">Enter the Forest</span>
           </a>
-          <!-- Bottom fog area -->
-          <a href="#scene-cave">
-            <rect x="0" y="918" width="1920" height="162" fill="#b0c4de"/>
+
+          <a href="#scene-cave" class="zone zone-valley" data-zone-name="fog">
+            <div class="zone-effect">
+              <div class="effect-mist"></div>
+            </div>
+            <span class="zone-label">Deeper Into Mist</span>
           </a>
-        </svg>
-      </div>
+        </div>
+      </section>
 
       <!-- Scene 3: Cave -->
-      <div id="scene-cave" class="scene-container">
+      <section id="scene-cave" class="scene">
         <img
-          data-src="images/dark-cave-waterfall-traverse-person-path-cliff.png"
-          class="visual-layer"
-          alt="A dark cave with a waterfall, showing a person traversing a cliff path." />
-        <svg
-          class="interaction-map"
-          viewBox="0 0 1920 2560"
-          preserveAspectRatio="xMidYMid slice">
-          <a href="#cave-left-fg">
-            <!-- Top Left Shape -->
-            <path d="M 0 0 L 900 0 L 990 1152 L 0 1152 Z" fill="#222222"></path>
+          src="images/dark-cave-waterfall-traverse-person-path-cliff.png"
+          class="scene-image"
+          alt="Dark cave with waterfall" />
+
+        <div class="zones">
+          <a
+            href="#cave-depths"
+            class="zone zone-cave-left"
+            data-zone-name="cave">
+            <div class="zone-effect">
+              <div class="effect-torch"></div>
+            </div>
+            <span class="zone-label">Cave Depths</span>
           </a>
-          <a href="#cave-left-bg">
-            <!-- Bottom Left Shape -->
-            <path
-              d="M 0 1152 L 990 1152 L 1100 2560 L 0 2560 Z"
-              fill="#111111"></path>
+
+          <a
+            href="#waterfall"
+            class="zone zone-waterfall"
+            data-zone-name="water">
+            <div class="zone-effect">
+              <div class="effect-water"></div>
+            </div>
+            <span class="zone-label">Follow the Water</span>
           </a>
-          <a href="#cave-right">
-            <!-- Right Shape -->
-            <path
-              d="M 900 0 L 1920 0 L 1920 2560 L 1100 2560 L 990 1152 L 900 0 Z"
-              fill="#333333"></path>
+
+          <a
+            href="#scene-cliff-edge"
+            class="zone zone-path"
+            data-zone-name="path">
+            <div class="zone-effect">
+              <div class="effect-shadow"></div>
+            </div>
+            <span class="zone-label">Continue Forward</span>
           </a>
-        </svg>
-      </div>
+        </div>
+      </section>
 
       <!-- Scene 4: Cliff Edge -->
-      <div id="scene-cliff-edge" class="scene-container">
-        <img data-src="images/dramatic-cliff-view-stormy-sea-waterfalling-into-bottomless-pit-mountain-horizon-adventure-nature-photography.jpg" class="visual-layer" alt="A dramatic cliff view of a stormy sea with a waterfall plunging into a pit.">
-        <svg class="interaction-map" viewBox="0 0 1920 2560" preserveAspectRatio="xMidYMid slice">
+      <section id="scene-cliff-edge" class="scene">
+        <img
+          src="images/dramatic-cliff-view-stormy-sea-waterfalling-into-bottomless-pit-mountain-horizon-adventure-nature-photography.jpg"
+          class="scene-image"
+          alt="Dramatic cliff with storm and abyss" />
 
-          <!--
-            Render order is important for clickability.
-            The ground is drawn first, so it's "behind" the other two shapes.
-            This ensures that the links for the pit and sky are clickable.
-          -->
-
-          <!-- Shape 3: The Ground (everything else) -->
-          <a href="#cliff-edge-main">
-            <path fill-rule="evenodd" d="
-              M 0 0 H 1920 V 2560 H 0 Z
-              M 960 0 L 1920 0 L 1920 1583 L 1135 1583 A 350 350 0 0 0 960 930 L 960 0 Z
-              M 1310 1280 A 350 350 0 1 0 610 1280 A 350 350 0 1 0 1310 1280 Z
-            " fill="#936d49"></path>
+        <div class="zones">
+          <a href="#open-sea" class="zone zone-storm" data-zone-name="storm">
+            <div class="zone-effect">
+              <div class="effect-lightning"></div>
+            </div>
+            <span class="zone-label">Brave the Storm</span>
           </a>
 
-          <!-- Shape 1: The Pit (a simple circle) -->
-          <a href="cliff-edge-pit.html">
-            <circle cx="960" cy="1280" r="350" fill="#333333"></circle>
+          <a
+            href="cliff-edge-pit.html"
+            class="zone zone-pit"
+            data-zone-name="abyss">
+            <div class="zone-effect">
+              <div class="effect-abyss-swirl"></div>
+            </div>
+            <span class="zone-label">Gaze Into Abyss</span>
           </a>
 
-          <!-- Shape 2: The Sky/Sea (a complex path for the top-right) -->
-          <a href="#open-sea">
-            <path d="M 960 0 L 1920 0 L 1920 1583 L 1135 1583 A 350 350 0 0 0 960 930 L 960 0 Z" fill="#0059a3"></path>
+          <a
+            href="#scene-purgatorio"
+            class="zone zone-ground"
+            data-zone-name="earth">
+            <div class="zone-effect">
+              <div class="effect-ground"></div>
+            </div>
+            <span class="zone-label">Find Solid Ground</span>
           </a>
-
-        </svg>
-      </div>
+        </div>
+      </section>
 
       <!-- Scene 5: Purgatorio -->
-      <div id="scene-purgatorio" class="scene-container">
+      <section id="scene-purgatorio" class="scene">
         <img
-          data-src="images/i kinda cookedv13.png"
-          class="visual-layer"
-          alt="A massive, icy mountain island in a turbulent sea under a cloudy sky." />
-        <svg
-          class="interaction-map"
-          viewBox="0 0 1920 2560"
-          preserveAspectRatio="xMidYMid slice">
-          <!-- Sea -->
-          <a href="#purgatorio-sea">
-            <path
-              d="M 0 2560 L 1920 2560 L 1920 1456 L 1200 1456 C 1000 1606, 920 1606, 720 1456 L 0 1456 Z"
-              fill="#323c9b"></path>
+          src="images/i kinda cookedv13.png"
+          class="scene-image"
+          alt="Icy mountain island in turbulent sea" />
+
+        <div class="zones">
+          <a
+            href="#purgatorio-ascent"
+            class="zone zone-clouds"
+            data-zone-name="sky">
+            <div class="zone-effect">
+              <div class="effect-clouds"></div>
+            </div>
+            <span class="zone-label">Ascend to Light</span>
           </a>
-          <!-- Sky -->
-          <a href="#purgatorio-sky">
-            <path
-              d="M 0 0 L 1920 0 L 1920 1456 L 1622 1456 L 1094 740 L 106 1456 L 0 1456 Z"
-              fill="#e0ffff"></path>
+
+          <a
+            href="#purgatorio-climb"
+            class="zone zone-mountain-island"
+            data-zone-name="mountain">
+            <div class="zone-effect">
+              <div class="effect-ice-glimmer"></div>
+            </div>
+            <span class="zone-label">Scale the Heights</span>
           </a>
-          <!-- Mountain -->
-          <a href="#purgatorio-mountain">
-            <path
-              d="M 1094 740 L 106 1456 L 720 1456 C 920 1606, 1000 1606, 1200 1456 L 1622 1456 Z"
-              fill="#3b2828"></path>
+
+          <a href="#scene-peak" class="zone zone-sea" data-zone-name="water">
+            <div class="zone-effect">
+              <div class="effect-waves"></div>
+            </div>
+            <span class="zone-label">Return to Origin</span>
           </a>
-        </svg>
-      </div>
+        </div>
+      </section>
     </main>
 
-    <script src="enhancer.js"></script>
+    <!-- Small in-page blend tester (toggle with B) -->
+    <div class="blend-panel" role="region" aria-label="Blend mode tester">
+      <label for="blendSelect">HEADSPACE blend:</label>
+      <select id="blendSelect" aria-label="Select blend mode">
+        <option value="overlay">overlay</option>
+        <option value="screen">screen</option>
+        <option value="soft-light">soft-light</option>
+        <option value="hard-light">hard-light</option>
+        <option value="multiply">multiply</option>
+        <option value="lighten">lighten</option>
+        <option value="difference">difference</option>
+        <option value="normal">normal</option>
+      </select>
+      <button type="button" id="blendApply">Apply</button>
+    </div>
+
+    <script src="enhancer-fresh.js"></script>
   </body>
 </html>
