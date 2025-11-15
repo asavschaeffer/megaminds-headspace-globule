@@ -19,7 +19,6 @@
 
 ======================================== */
 
-
 /* ========================================
    ZONE BOUNDARIES - EDIT THESE!
    ======================================== */
@@ -128,7 +127,6 @@
   height: 30%;
 }
 
-
 /* ========================================
    BASE STYLES
    ======================================== */
@@ -179,10 +177,10 @@ body {
 }
 
 /* Gentle image enhance on hover */
-.scene:has(.zone:hover) .scene-image {
-  filter: brightness(1.05) contrast(1.1) saturate(1.05);
+/* Enhance image only while hovering an actual SVG path */
+.scene:has(.zone-svg path:hover) .scene-image {
+  filter: brightness(1.05) contrast(1.08) saturate(1.03);
 }
-
 
 /* ========================================
    ZONE BASE STYLES
@@ -239,7 +237,6 @@ body {
 .zone:hover .zone-effect {
   opacity: 1;
 }
-
 
 /* SVG Zone Boundaries (from image editor tracings) */
 .zone-svg {
@@ -316,9 +313,8 @@ body.debug-zones .zone-label {
 
 body.debug-zones .zone-label-sky {
   background: rgba(0, 0, 0, 0.5); /* Lighter for sky */
-  font-size: 20px; /* Keep larger size in debug */
+  font-size: 120px; /* Keep larger size in debug */
 }
-
 
 /* ========================================
    ZONE LABELS
@@ -342,11 +338,13 @@ body.debug-zones .zone-label-sky {
 
 /* Sky zone label - HEADSPACE (embedded in scene) */
 .zone-label-sky {
-  top: 25%; /* Centered in upper sky region */
+  top: 5%; /* Centered in upper sky region */
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  font-size: clamp(18px, 3.2vw, 36px);
+  font-size: clamp(180px, 3.2vw, 360px);
   font-weight: 100;
   letter-spacing: 12px;
+  color: #d0d0d0;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
 
   /* BLEND MODE EXPERIMENTS - try each one:
      - overlay: Combines multiply/screen (dramatic, embedded)
@@ -361,10 +359,8 @@ body.debug-zones .zone-label-sky {
 
   opacity: 0.6; /* Subtle, embedded feel */
   color: rgba(255, 255, 255, 0.4); /* Start more transparent */
-  text-shadow:
-    0 0 40px rgba(255, 255, 255, 0.6),
-    0 0 80px rgba(173, 216, 230, 0.4),
-    0 0 120px rgba(135, 206, 250, 0.2);
+  text-shadow: 0 0 40px rgba(255, 255, 255, 0.6),
+    0 0 80px rgba(173, 216, 230, 0.4), 0 0 120px rgba(135, 206, 250, 0.2);
 }
 
 /* Fallback when mix-blend-mode is unsupported */
@@ -373,9 +369,7 @@ body.debug-zones .zone-label-sky {
     mix-blend-mode: normal;
     opacity: 0.9;
     color: #ffffff;
-    text-shadow:
-      0 0 8px rgba(0, 0, 0, 0.6),
-      0 0 24px rgba(0, 0, 0, 0.8);
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.6), 0 0 24px rgba(0, 0, 0, 0.8);
   }
 }
 
@@ -383,8 +377,7 @@ body.debug-zones .zone-label-sky {
 .zone:has(.zone-svg path:hover) .zone-label-sky {
   color: rgba(255, 255, 255, 0.9);
   opacity: 1;
-  text-shadow:
-    0 0 60px rgba(255, 255, 255, 0.8),
+  text-shadow: 0 0 60px rgba(255, 255, 255, 0.8),
     0 0 120px rgba(173, 216, 230, 0.6);
 }
 
@@ -394,18 +387,14 @@ body.debug-zones .zone-label-sky {
   bottom: auto;
   color: rgba(255, 255, 255, 0); /* Start invisible */
   font-weight: 400; /* Slightly bolder than sky */
-  text-shadow:
-    0 3px 10px rgba(0, 0, 0, 1),
-    0 6px 20px rgba(0, 0, 0, 0.8),
+  text-shadow: 0 3px 10px rgba(0, 0, 0, 1), 0 6px 20px rgba(0, 0, 0, 0.8),
     0 0 30px rgba(0, 0, 0, 0.6);
 }
 
 .zone-peak:hover .zone-label,
 .zone-peak:has(.zone-svg path:hover) .zone-label {
   color: rgba(255, 255, 255, 1); /* Full bright on hover */
-  text-shadow:
-    0 3px 12px rgba(0, 0, 0, 1),
-    0 6px 24px rgba(0, 0, 0, 0.9),
+  text-shadow: 0 3px 12px rgba(0, 0, 0, 1), 0 6px 24px rgba(0, 0, 0, 0.9),
     0 0 50px rgba(255, 255, 255, 0.5); /* White glow */
 }
 
@@ -414,18 +403,14 @@ body.debug-zones .zone-label-sky {
   bottom: 30%; /* Centered in fog/cloud area */
   color: rgba(255, 255, 255, 0); /* Start invisible */
   font-weight: 400; /* Slightly bolder than sky */
-  text-shadow:
-    0 3px 10px rgba(0, 0, 0, 1),
-    0 6px 20px rgba(0, 0, 0, 0.8),
+  text-shadow: 0 3px 10px rgba(0, 0, 0, 1), 0 6px 20px rgba(0, 0, 0, 0.8),
     0 0 30px rgba(0, 0, 0, 0.6);
 }
 
 .zone-fog:hover .zone-label,
 .zone-fog:has(.zone-svg path:hover) .zone-label {
   color: rgba(255, 255, 255, 1); /* Full bright on hover */
-  text-shadow:
-    0 3px 12px rgba(0, 0, 0, 1),
-    0 6px 24px rgba(0, 0, 0, 0.9),
+  text-shadow: 0 3px 12px rgba(0, 0, 0, 1), 0 6px 24px rgba(0, 0, 0, 0.9),
     0 0 50px rgba(211, 211, 211, 0.5); /* Soft white glow */
 }
 
@@ -434,68 +419,177 @@ body.debug-zones .zone-label-sky {
   opacity: 1;
 }
 
-
 /* ========================================
    VISUAL EFFECTS (PORTED FROM ENHANCED)
    ======================================== */
 
-/* Stars Effect */
+/* Stars Effect - Living, breathing stars */
 .effect-stars {
   width: 100%;
   height: 100%;
-  background-image:
-    radial-gradient(2px 2px at 20% 30%, white, transparent),
-    radial-gradient(2px 2px at 60% 70%, white, transparent),
-    radial-gradient(1px 1px at 50% 50%, white, transparent),
-    radial-gradient(2px 2px at 80% 10%, white, transparent);
-  background-size: 300% 300%;
-  background-position: 0% 0%;
-  animation: starTwinkle 15s ease-in-out infinite;
-  opacity: 0.6;
+  position: relative;
+  opacity: 0.85;
+  mix-blend-mode: screen;
 }
 
-@keyframes starTwinkle {
-  0%, 100% { background-position: 0% 0%; }
-  50% { background-position: 100% 100%; }
+/* Individual star elements will be created by JavaScript */
+.star {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 30% 30%,
+    rgba(255, 255, 255, 0.9),
+    rgba(255, 255, 255, 0.1)
+  );
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.8), 0 0 8px rgba(173, 216, 230, 0.4);
+  pointer-events: none;
 }
 
-/* Glow Effect */
+/* Randomized twinkling for individual stars */
+.star {
+  animation: twinkle var(--duration, 3s) ease-in-out var(--delay, 0s) infinite;
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Shooting star animation */
+.shooting-star {
+  position: absolute;
+  width: 2px;
+  height: 120px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 1), transparent);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.8),
+    0 0 40px rgba(173, 216, 230, 0.6);
+  filter: blur(0.5px);
+  animation: shootingStar 2s ease-in forwards;
+  pointer-events: none;
+}
+
+@keyframes shootingStar {
+  0% {
+    transform: translateX(0) translateY(0) rotate(-45deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(500px) translateY(500px) rotate(-45deg);
+    opacity: 0;
+  }
+}
+
+/* Mountain Glow Effect - Responds to pointer position */
 .effect-glow {
   width: 100%;
   height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Base mountain shadow (always visible) */
+.effect-glow::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.4), transparent);
+  pointer-events: none;
+}
+
+/* Golden sun reflection (tracks pointer) */
+.effect-glow::after {
+  content: "";
+  position: absolute;
+  width: 300px;
+  height: 300px;
   background: radial-gradient(
-    ellipse at center,
-    rgba(255, 255, 255, 0.3) 0%,
-    rgba(255, 255, 255, 0.1) 30%,
-    transparent 70%
+    circle at center,
+    rgba(255, 200, 100, 0.6) 0%,
+    rgba(255, 180, 60, 0.3) 25%,
+    rgba(255, 160, 0, 0.1) 50%,
+    transparent 100%
   );
-  filter: blur(20px);
-  transform: scale(0.8);
-  transition: transform 0.6s ease;
+  filter: blur(40px);
+  top: var(--glow-y, 20%);
+  left: var(--glow-x, 50%);
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
 }
 
-.zone-peak:hover .effect-glow {
-  transform: scale(1.2);
+.zone-peak:hover .effect-glow::after {
+  opacity: 0.8;
 }
 
-/* Fog Effect */
+/* Fog Effect - Volumetric three-layer parallax system */
 .effect-fog,
 .effect-mist {
   width: 100%;
   height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Back fog layer (slowest, most subtle) */
+.effect-fog::before {
+  content: "";
+  position: absolute;
+  inset: 0;
   background: linear-gradient(
     180deg,
     transparent 0%,
-    rgba(255, 255, 255, 0.05) 50%,
-    rgba(255, 255, 255, 0.1) 100%
+    rgba(255, 255, 255, 0.03) 100%
   );
-  transform: translateY(100%);
-  transition: transform 1s ease;
+  transform: translateX(var(--fog-back-x, 0)) translateY(var(--fog-back-y, 0));
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
 }
 
-.zone:hover .effect-fog,
-.zone:hover .effect-mist {
-  transform: translateY(0);
+/* Middle fog layer (medium speed, medium opacity) */
+.effect-fog::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.08) 100%
+  );
+  transform: translateX(var(--fog-mid-x, 0)) translateY(var(--fog-mid-y, 0));
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+
+/* Front fog layer (fastest, most opaque) - uses CSS variable for positioning */
+.fog-layer-front {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.12) 100%
+  );
+  transform: translateX(var(--fog-front-x, 0)) translateY(var(--fog-front-y, 0));
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+
+.zone:hover .effect-fog::before,
+.zone:hover .effect-fog::after,
+.zone:hover .fog-layer-front {
+  opacity: 1;
 }
 
 .effect-fog-reverse {
@@ -535,9 +629,16 @@ body.debug-zones .zone-label-sky {
 }
 
 @keyframes sway {
-  0%, 100% { transform: skewX(0deg); }
-  25% { transform: skewX(1deg); }
-  75% { transform: skewX(-1deg); }
+  0%,
+  100% {
+    transform: skewX(0deg);
+  }
+  25% {
+    transform: skewX(1deg);
+  }
+  75% {
+    transform: skewX(-1deg);
+  }
 }
 
 /* Torch Effect */
@@ -554,9 +655,17 @@ body.debug-zones .zone-label-sky {
 }
 
 @keyframes flicker {
-  0%, 100% { opacity: 0.8; }
-  50% { opacity: 1; }
-  25%, 75% { opacity: 0.6; }
+  0%,
+  100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+  25%,
+  75% {
+    opacity: 0.6;
+  }
 }
 
 /* Water Effect */
@@ -578,8 +687,12 @@ body.debug-zones .zone-label-sky {
 }
 
 @keyframes shimmer {
-  0% { background-position: 200% 200%; }
-  100% { background-position: -200% -200%; }
+  0% {
+    background-position: 200% 200%;
+  }
+  100% {
+    background-position: -200% -200%;
+  }
 }
 
 /* Shadow Effect */
@@ -612,9 +725,20 @@ body.debug-zones .zone-label-sky {
 }
 
 @keyframes lightning {
-  0%, 90%, 100% { opacity: 0; }
-  91%, 93%, 95% { opacity: 1; }
-  92%, 94% { opacity: 0; }
+  0%,
+  90%,
+  100% {
+    opacity: 0;
+  }
+  91%,
+  93%,
+  95% {
+    opacity: 1;
+  }
+  92%,
+  94% {
+    opacity: 0;
+  }
 }
 
 /* Abyss Swirl Effect (GORGEOUS from enhanced!) */
@@ -637,8 +761,12 @@ body.debug-zones .zone-label-sky {
 }
 
 @keyframes swirl {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Ground Effect */
@@ -665,8 +793,13 @@ body.debug-zones .zone-label-sky {
 }
 
 @keyframes cloudFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-20px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
 }
 
 /* Ice Glimmer Effect (GORGEOUS from enhanced!) */
@@ -688,8 +821,13 @@ body.debug-zones .zone-label-sky {
 }
 
 @keyframes glimmer {
-  0%, 100% { background-position: 0% 0%; }
-  50% { background-position: 100% 100%; }
+  0%,
+  100% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
 }
 
 /* Waves Effect */
@@ -710,10 +848,13 @@ body.debug-zones .zone-label-sky {
 }
 
 @keyframes waves {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(100px); }
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(100px);
+  }
 }
-
 
 /* ========================================
    ACCESSIBILITY / UTILITIES / PANELS
@@ -743,7 +884,8 @@ body.debug-zones .zone-label-sky {
   padding: 8px 10px;
   border-radius: 6px;
   color: #ddd;
-  font: 12px/1.2 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font: 12px/1.2 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
   backdrop-filter: blur(4px);
   display: none;
 }
@@ -777,14 +919,44 @@ body.show-blend-panel .blend-panel {
   display: block;
 }
 
+/* ========================================
+   PERFORMANCE OPTIMIZATIONS (scoped)
+   ======================================== */
+
+/* Hint GPU only while interacting to reduce memory budget */
+.zone:hover .star,
+.zone:hover .shooting-star,
+.zone:hover .effect-glow,
+.zone:hover .effect-glow::before,
+.zone:hover .effect-glow::after,
+.zone:hover .effect-fog,
+.zone:hover .effect-fog::before,
+.zone:hover .effect-fog::after,
+.zone:hover .fog-layer-front {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
   * {
     animation: none !important;
     transition: none !important;
   }
-}
 
+  .star,
+  .shooting-star,
+  .effect-glow,
+  .effect-glow::before,
+  .effect-glow::after,
+  .effect-fog,
+  .effect-fog::before,
+  .effect-fog::after,
+  .fog-layer-front {
+    will-change: auto;
+  }
+}
 
 /* ========================================
    RESPONSIVE

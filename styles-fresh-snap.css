@@ -1,0 +1,120 @@
+@import url("styles-fresh.css");
+
+/* Scroll snap behavior aligned with index1 (styles.css) */
+.scroll-container {
+  scroll-snap-type: y mandatory; /* Strong snap like index1 */
+  scroll-behavior: smooth;
+  scrollbar-width: none; /* Firefox hide scrollbar */
+}
+
+.scroll-container::-webkit-scrollbar {
+  display: none; /* WebKit hide scrollbar */
+}
+
+/* Sections snap to center like index1's .scene-container */
+.scene {
+  scroll-snap-align: center;
+  /* main views are 100vh */
+  height: 100vh;
+  width: 100%;
+}
+
+/* First snaps to start, last snaps to end */
+.scene:first-of-type {
+  scroll-snap-align: start;
+}
+.scene:last-of-type {
+  scroll-snap-align: end;
+}
+
+/* Allow <use> references to be clickable like paths */
+.zone-svg use {
+  fill: transparent;
+  pointer-events: all;
+  cursor: pointer;
+  transition: fill 0.3s ease;
+  stroke: transparent;
+  stroke-width: 2;
+}
+
+/* Images/overlays scale with scene height */
+.scene-image {
+  height: 100%;
+  top: 0;
+  position: relative;
+  object-fit: cover;
+}
+
+.zones {
+  top: 0;
+  height: 100%;
+}
+
+.zone-svg {
+  top: 0;
+  height: 100%;
+}
+
+/* Ensure zones that carry SVG overlays have a full-size box for 100% sizing */
+.zone:has(.zone-svg) {
+  position: absolute;
+  inset: 0;
+}
+
+/* Effect overlay confined by SVG clipPath (via foreignObject) */
+.zone-effect-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.zone-effect-html {
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.zone:hover .zone-effect-svg {
+  opacity: 1;
+}
+
+/* Distribute extra 20vh as requested: first bottom-heavy, last top-heavy */
+#scene-peak .scene-image {
+  object-position: center bottom;
+}
+#scene-bloodlake .scene-image {
+  object-position: center top;
+}
+
+/* Transition slices between scenes (no snap) */
+.transition {
+  height: 20vh;
+  scroll-snap-align: none;
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Peak → Cliff transition image (update path if different) */
+.transition-peak-cliff {
+  background-image: url("images/prod/p1transitionp2.png");
+}
+
+/* Mobile tuning */
+@media (max-width: 768px) {
+  .scroll-container {
+    scroll-snap-type: y proximity;
+  }
+  .scene {
+    height: 100vh;
+  }
+  .transition {
+    height: 16vh;
+  }
+}
