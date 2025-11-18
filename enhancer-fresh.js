@@ -7,6 +7,7 @@
   // ========================================
   // STATE MANAGEMENT
   // ========================================
+  const WELCOME_STORAGE_KEY = 'sol-eremus-welcome-shown';
   let debugMode = false;
   let mouseX = window.innerWidth / 2;
   let mouseY = window.innerHeight / 2;
@@ -522,6 +523,74 @@
   // INITIALIZATION
   // ========================================
 
+  function setupWelcomeModal() {
+    const modal = document.getElementById('welcomeModal');
+    const dismissBtn = document.getElementById('welcomeDismiss');
+    if (!modal || !dismissBtn) return;
+
+    let storageAvailable = true;
+    try {
+      const testKey = '__welcome_test__';
+      window.localStorage.setItem(testKey, '1');
+      window.localStorage.removeItem(testKey);
+    } catch (_storageErr) {
+      storageAvailable = false;
+    }
+
+    const hasSeen = storageAvailable
+      ? window.localStorage.getItem(WELCOME_STORAGE_KEY) === '1'
+      : false;
+
+    if (hasSeen) return;
+
+    const markSeen = () => {
+      if (!storageAvailable) return;
+      try {
+        window.localStorage.setItem(WELCOME_STORAGE_KEY, '1');
+      } catch (_err) {
+        // Ignore write issues (private mode, etc.)
+      }
+    };
+
+    const handleKeydown = (event) => {
+      if (event.key === 'Escape') {
+        closeModal();
+      }
+    };
+
+    const closeModal = () => {
+      if (modal.hasAttribute('hidden')) return;
+      modal.setAttribute('hidden', '');
+      document.body.classList.remove('welcome-modal-open');
+      dismissBtn.removeEventListener('click', handleDismiss);
+      modal.removeEventListener('click', handleOutsideClick);
+      document.removeEventListener('keydown', handleKeydown, true);
+      markSeen();
+    };
+
+    const handleDismiss = () => {
+      closeModal();
+    };
+
+    const handleOutsideClick = (event) => {
+      if (event.target === modal) {
+        closeModal();
+      }
+    };
+
+    dismissBtn.addEventListener('click', handleDismiss);
+    modal.addEventListener('click', handleOutsideClick);
+    document.addEventListener('keydown', handleKeydown, true);
+
+    modal.removeAttribute('hidden');
+    document.body.classList.add('welcome-modal-open');
+
+    // Focus after frame to ensure visibility
+    setTimeout(() => {
+      dismissBtn.focus({ preventScroll: true });
+    }, 50);
+  }
+
   // Constrain CSS-based effects to SVG path shapes using foreignObject + clipPath
   function confineEffectsToPaths() {
     const zones = document.querySelectorAll('.zone');
@@ -592,6 +661,7 @@
       setupSkyZoneInteractivity();
       injectZoneSprite();
       confineEffectsToPaths();
+      setupWelcomeModal();
 
       // If reduced motion, keep animations paused
       if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -621,6 +691,7 @@
     setupSkyZoneInteractivity();
     injectZoneSprite();
     confineEffectsToPaths();
+    setupWelcomeModal();
 
     console.log('%c✨ Sol Eremus Interactive Scene', 'font-size: 16px; color: #4fc3f7; font-weight: bold');
     console.log('%c💫 Stars twinkling | Shooting stars on sky hover', 'color: #4fc3f7; font-size: 12px');

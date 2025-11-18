@@ -10,6 +10,27 @@
     <link rel="stylesheet" href="styles-fresh-snap.css" />
   </head>
   <body>
+    <div
+      id="welcomeModal"
+      class="welcome-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="welcomeTitle"
+      aria-describedby="welcomeDescription"
+      hidden>
+      <div class="welcome-modal__content">
+        <h2 id="welcomeTitle">Welcome to Sol Eremus</h2>
+        <p id="welcomeDescription">
+          This experimental interface lets you navigate by exploring each scene.
+          Scroll to journey downward and click on highlighted zones within the
+          art to “travel” to new locations.
+        </p>
+        <button type="button" id="welcomeDismiss" class="welcome-modal__button">
+          Begin Exploring
+        </button>
+      </div>
+    </div>
+
     <main class="scroll-container">
       <!-- Scene 1: Peak -->
       <section id="scene-peak" class="scene">
