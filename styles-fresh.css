@@ -127,6 +127,29 @@
   height: 30%;
 }
 
+/* Scene group: Valley → Bloodlake (simple top/bottom bands) */
+#scene-valley .zone-top,
+#scene-cave .zone-top,
+#scene-whirlpool .zone-top,
+#scene-ocean .zone-top,
+#scene-bloodlake .zone-top {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 21.6%;
+}
+
+#scene-valley .zone-bottom,
+#scene-cave .zone-bottom,
+#scene-whirlpool .zone-bottom,
+#scene-ocean .zone-bottom,
+#scene-bloodlake .zone-bottom {
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 21.6%;
+}
+
 /* ========================================
    BASE STYLES
    ======================================== */

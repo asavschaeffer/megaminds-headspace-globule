@@ -56,7 +56,8 @@
 }
 
 /* Ensure zones that carry SVG overlays have a full-size box for 100% sizing */
-.zone:has(.zone-svg) {
+#scene-peak .zone:has(.zone-svg),
+#scene-cliff .zone:has(.zone-svg) {
   position: absolute;
   inset: 0;
 }
@@ -91,19 +92,19 @@
   object-position: center top;
 }
 
-/* Transition slices between scenes (no snap) */
-.transition {
-  height: 20vh;
-  scroll-snap-align: none;
-  position: relative;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+#scene-valley .scene-image {
+  object-position: center 52%;
 }
 
-/* Peak → Cliff transition image (update path if different) */
-.transition-peak-cliff {
-  background-image: url("images/prod/p1transitionp2.png");
+/* Compress inter-scene transitions to eliminate black bands */
+.transition {
+  height: 0;
+  scroll-snap-align: none;
+  overflow: hidden;
+}
+
+.transition::before {
+  content: none;
 }
 
 /* Mobile tuning */
