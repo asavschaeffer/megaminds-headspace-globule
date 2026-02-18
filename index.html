@@ -39,6 +39,7 @@
           src="images/prod/a_fog_planet's_atmosphere_is_pierced_by_a_single_sharp_mountain_peak._a_curved_horizon.jpeg"
           class="scene-image"
           alt="Peak: a sharp mountain piercing a fog planet's horizon" />
+
         <div class="zones">
           <a
             href="https://headsparce.onrender.com/headspace.html"
@@ -50,9 +51,6 @@
               class="zone-svg">
               <use href="#headspace-starry-path"></use>
             </svg>
-            <div class="zone-effect">
-              <div class="effect-stars"></div>
-            </div>
             <span class="zone-label zone-label-sky">HEADSPACE</span>
           </a>
           <a href="#scene-cliff" class="zone zone-fog" data-zone-name="fog">
@@ -62,10 +60,7 @@
               class="zone-svg">
               <use href="#atmosphere"></use>
             </svg>
-            <div class="zone-effect">
-              <div class="effect-fog"></div>
-            </div>
-            <span class="zone-label">Descend Through Clouds</span>
+            <span class="zone-label scroll-cta"><span class="scroll-cta-text"></span><span class="scroll-cta-arrow">&#8595;</span></span>
           </a>
           <a
             href="https://github.com/asavschaeffer/0"
@@ -77,10 +72,7 @@
               class="zone-svg">
               <use href="#mountain-peak"></use>
             </svg>
-            <div class="zone-effect">
-              <div class="effect-glow"></div>
-            </div>
-            <span class="zone-label">Ascend the Summit</span>
+            <span class="zone-label">Asa Schaeffer</span>
           </a>
         </div>
       </section>
@@ -92,9 +84,64 @@
       <!-- Scene 2: Cliff -->
       <section id="scene-cliff" class="scene">
         <img
-          src="images/prod/landscape-nature-mountain-snow-cloud-fog.jpg"
+          src="images/prod/hints-sheer-cliff-obscured-by-thick-fog.jpeg"
           class="scene-image"
           alt="Cliff: foggy ridgeline and looming escarpments" />
+
+        <!-- Wireframe content panel -->
+        <div class="scene-panel" aria-label="Diegetic UX">
+          <!-- Top icon -->
+          <div class="scene-panel__icon" aria-hidden="true">
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18 5 L33 29 H3 Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+              <path d="M12 29 L18 19 L24 29" stroke="currentColor" stroke-width="1" stroke-linejoin="round" opacity="0.45"/>
+              <line x1="3" y1="29" x2="33" y2="29" stroke="currentColor" stroke-width="1.5" opacity="0.35"/>
+            </svg>
+          </div>
+
+          <!-- Heading -->
+          <h2 class="scene-panel__heading">Diegetic UX</h2>
+
+          <!-- Body -->
+          <p class="scene-panel__body">The current UX paradigm is ready for upheaval. It's my view that agents will act as an intermediary between the human and the world wide web. <br><em>The future is visual storytelling.</em>
+          </p>
+
+          <!-- Bottom icon links -->
+          <div class="scene-panel__links">
+            <a href="#" class="panel-link" aria-label="Heard, Chef!">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M7 17 H13 V13 H7 Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+                <line x1="6" y1="13" x2="14" y2="13" stroke="currentColor" stroke-width="1.2"/>
+                <path d="M7 13 C7 13 6 11 6 9 C6 6.8 7.8 5 10 5 C12.2 5 14 6.8 14 9 C14 11 13 13 13 13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M8.5 5 C8.5 5 8 3.5 8 2.5 C8 2.5 10 3 10 5" stroke="currentColor" stroke-width="1" stroke-linecap="round" opacity="0.6"/>
+                <path d="M11.5 5 C11.5 5 12 3.5 12 2.5 C12 2.5 10 3 10 5" stroke="currentColor" stroke-width="1" stroke-linecap="round" opacity="0.6"/>
+              </svg>
+              <span>Heard, Chef!</span>
+            </a>
+            <a href="https://megaminds.com" class="panel-link" aria-label="Megaminds">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <circle cx="10" cy="4" r="1.5" stroke="currentColor" stroke-width="1.2"/>
+                <circle cx="3.5" cy="14" r="1.5" stroke="currentColor" stroke-width="1.2"/>
+                <circle cx="16.5" cy="14" r="1.5" stroke="currentColor" stroke-width="1.2"/>
+                <line x1="10" y1="5.5" x2="4.5" y2="12.8" stroke="currentColor" stroke-width="1" opacity="0.7"/>
+                <line x1="10" y1="5.5" x2="15.5" y2="12.8" stroke="currentColor" stroke-width="1" opacity="0.7"/>
+                <line x1="5" y1="14" x2="15" y2="14" stroke="currentColor" stroke-width="1" opacity="0.7"/>
+              </svg>
+              <span>Megaminds</span>
+            </a>
+            <a href="#" class="panel-link" aria-label="AI-Native Dev">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M10 3 C10 3 7 6 7 10 C7 12.8 8.3 14.5 10 15.5 C11.7 14.5 13 12.8 13 10 C13 6 10 3 10 3 Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+                <path d="M6 8 C4 8.5 3 10 3 10 C3 10 4.5 11 6.5 11" stroke="currentColor" stroke-width="1" stroke-linecap="round" opacity="0.6"/>
+                <path d="M14 8 C16 8.5 17 10 17 10 C17 10 15.5 11 13.5 11" stroke="currentColor" stroke-width="1" stroke-linecap="round" opacity="0.6"/>
+                <line x1="10" y1="15.5" x2="10" y2="18" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                <line x1="7.5" y1="17" x2="12.5" y2="17" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+              </svg>
+              <span>AI-Native Dev</span>
+            </a>
+          </div>
+        </div>
+
         <div class="zones">
           <!-- Top fog: back to peak -->
           <a href="#scene-peak" class="zone zone-fog-top" data-zone-name="fog">
@@ -104,9 +151,6 @@
               class="zone-svg">
               <use href="#foggy-cliff-top-fog"></use>
             </svg>
-            <div class="zone-effect">
-              <div class="effect-fog-reverse"></div>
-            </div>
             <span class="zone-label">Return Above</span>
           </a>
 
@@ -121,9 +165,6 @@
               class="zone-svg">
               <use href="#foggy-cliff-cliff"></use>
             </svg>
-            <div class="zone-effect">
-              <div class="effect-ground"></div>
-            </div>
             <span class="zone-label">Descend the Cliffs</span>
           </a>
 
@@ -138,9 +179,6 @@
               class="zone-svg">
               <use href="#foggy-cliff-bottom-fog"></use>
             </svg>
-            <div class="zone-effect">
-              <div class="effect-mist"></div>
-            </div>
             <span class="zone-label">Deeper Into Mist</span>
           </a>
         </div>
@@ -151,7 +189,7 @@
       <!-- Scene 3: Valley -->
       <section id="scene-valley" class="scene">
         <img
-          src="images/prod/fertile-cliffside-valley.png"
+          src="images/prod/fertile-valley-found-between-sheer-cliffs.jpeg"
           class="scene-image"
           alt="Valley: fertile cliffside valley" />
         <div class="zones">

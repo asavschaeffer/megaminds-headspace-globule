@@ -62,27 +62,6 @@
   inset: 0;
 }
 
-/* Effect overlay confined by SVG clipPath (via foreignObject) */
-.zone-effect-svg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.zone-effect-html {
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
-
-.zone:hover .zone-effect-svg {
-  opacity: 1;
-}
 
 /* Distribute extra 20vh as requested: first bottom-heavy, last top-heavy */
 #scene-peak .scene-image {
@@ -194,4 +173,130 @@
 
 body.welcome-modal-open {
   overflow: hidden;
+}
+
+/* ========================================
+   SCENE 1: PEAK — zone label overrides
+   ======================================== */
+
+/* "Sol Eremus" hover label: system sans, wide tracking, fog-band position */
+.zone-peak .zone-label {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: clamp(0.72rem, 1.5vw, 0.96rem);
+  font-weight: 300;
+  letter-spacing: 0.5em;
+  top: 40%; /* fog band */
+}
+
+/* Scroll CTA: always visible, static by default */
+.zone-fog .scroll-cta {
+  color: rgba(255, 255, 255, 0.6); /* restore natural color overridden by zone-fog .zone-label */
+  text-shadow: 0 0 12px rgba(0, 0, 0, 0.8); /* pin shadow — zone-fog .zone-label resets it to none */
+}
+
+.scroll-cta-arrow {
+  animation: none;
+}
+
+/* Bounce only on hover */
+.zone-fog:hover .scroll-cta-arrow,
+.zone-fog:has(.zone-svg path:hover) .scroll-cta-arrow {
+  animation: bounce-arrow 2s ease-in-out infinite;
+}
+
+/* ========================================
+   SCENE 2: CLIFF — content panel wireframe
+   ======================================== */
+
+.scene-panel {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+
+  width: min(360px, 82vw);
+  padding: 1.75rem 1.6rem;
+
+  background: rgba(6, 10, 18, 0.72);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(120, 145, 190, 0.18);
+  border-radius: 12px;
+
+  color: #dde3f5;
+  text-align: center;
+  pointer-events: none; /* panel itself doesn't intercept zone clicks */
+}
+
+.scene-panel__icon {
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 1.1rem;
+  line-height: 0;
+}
+
+.scene-panel__heading {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: clamp(1.05rem, 2.6vw, 1.45rem);
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.88);
+  margin-bottom: 0.9rem;
+}
+
+.scene-panel__body {
+  font-size: clamp(0.82rem, 1.7vw, 0.92rem);
+  line-height: 1.7;
+  color: rgba(205, 215, 238, 0.68);
+  margin-bottom: 1.1rem;
+}
+
+.scene-panel__list {
+  list-style: none;
+  text-align: left;
+  margin-bottom: 1.4rem;
+}
+
+.scene-panel__list li {
+  font-size: clamp(0.76rem, 1.5vw, 0.84rem);
+  color: rgba(190, 202, 228, 0.58);
+  padding: 0.3rem 0 0.3rem 0.9rem;
+  border-left: 1px solid rgba(140, 165, 210, 0.22);
+  margin-bottom: 0.2rem;
+  letter-spacing: 0.02em;
+}
+
+.scene-panel__links {
+  display: flex;
+  gap: 1.6rem;
+  justify-content: center;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(140, 165, 210, 0.14);
+}
+
+.panel-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  text-decoration: none;
+  color: rgba(185, 200, 232, 0.55);
+  pointer-events: all; /* links ARE clickable through the panel */
+  transition: color 0.25s ease;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: clamp(0.66rem, 1.2vw, 0.74rem);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.panel-link:hover,
+.panel-link:focus-visible {
+  color: rgba(220, 232, 255, 0.92);
+}
+
+.panel-link:focus-visible {
+  outline: 1px dashed rgba(160, 190, 240, 0.6);
+  outline-offset: 3px;
+  border-radius: 2px;
 }
